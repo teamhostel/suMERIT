@@ -1,0 +1,34 @@
+Arguments: 
+  /usr/bin/node /usr/bin/yarn add hardhat
+
+PATH: 
+  /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/mnt/c/Python310/Scripts/:/mnt/c/Python310/:/mnt/c/windows/system32:/mnt/c/windows:/mnt/c/windows/System32/Wbem:/mnt/c/windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files (x86)/STMicroelectronics/STM32 ST-LINK Utility/ST-LINK Utility:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA NvDLISR:/mnt/c/Program Files/Intel/WiFi/bin/:/mnt/c/Program Files/Common Files/Intel/WirelessCommon/:/mnt/c/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL:/mnt/c/Program Files/Intel/Intel(R) Management Engine Components/DAL:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files (x86)/GTK2-Runtime/bin:/mnt/c/Users/pas12/anaconda3:/mnt/c/Users/pas12/anaconda3/Scripts:/mnt/c/Program Files/Git/cmd:/mnt/c/Program Files/nodejs/:/mnt/c/ProgramData/chocolatey/bin:/mnt/c/Program Files/Docker/Docker/resources/bin:/mnt/c/ProgramData/DockerDesktop/version-bin:/mnt/c/Users/pas12/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/pas12/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Users/pas12/.platformio/penv/Scripts:/mnt/c/Users/pas12/AppData/Roaming/npm:/mnt/c/Exercism:/snap/bin
+
+Yarn version: 
+  1.22.17
+
+Node version: 
+  17.5.0
+
+Platform: 
+  linux x64
+
+Trace: 
+  Error: getaddrinfo ENOTFOUND registry.yarnpkg.com
+      at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:72:26)
+
+npm manifest: 
+  {
+    "name": "contrib-metis-denver",
+    "version": "1.0.0",
+    "main": "index.js",
+    "repository": "git@github.com:Peyton-Spencer/contrib-metis-denver.git",
+    "author": "Peyton-Spencer <pas1234567@gmail.com>",
+    "license": "MIT"
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
