@@ -11,11 +11,13 @@ contract BadgeFactory {
     struct Badge
     {
         address owner;
+        uint memberId;
         uint32 stripeCount;
     }
 
     address private daoToken;
     Badge[] public badges;
+    uint private memberNonce = 0;
 
     // /// @param _token address for existing DAO token
     // /// @todo support more of the DAO stack: creating tokens
@@ -42,8 +44,9 @@ contract BadgeFactory {
 
     function _mintBadge(address _owner) internal
     {
-        uint id = badges.push(Badge(_owner, 0)) - 1;
-        addrToMemberId[_owner] = id;
-        NewBadge(_owner, id);
+        badges.push(Badge(_owner, memberNonce, 0));
+        addrToMemberId[_owner] = memberNonce;
+        emit NewBadge(_owner, memberNonce);
+        memberNonce++;
     }
 }
