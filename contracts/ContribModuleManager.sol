@@ -2,6 +2,7 @@
 pragma solidity 0.8.10;
 
 // import {ZoraProtocolFeeSettings} from "./auxiliary/ZoraProtocolFeeSettings/ZoraProtocolFeeSettings.sol";
+// import @openzeppelin/contracts/token/ERC721/erc721.sol
 
 /// @title ContribModuleManager
 /// @author 
