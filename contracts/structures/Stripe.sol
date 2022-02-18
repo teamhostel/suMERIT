@@ -7,8 +7,8 @@ import "./Contribution.sol";
 
 struct Stripe {
     ///@dev one stripe may have many contrib types with separate messages
-    ///@notice concise github commit-style message. Or could be one string
-    string stripeMessage;
+    ///@notice concise github commit-style message describing the purpose of the stripe.
+    string message;
     //purpose: store bulk non-uniform pieces of contribution
     //      possibly store on data availability layer
     //example: organizing a party (manual) ++ notion explainer docs related to party
@@ -16,11 +16,10 @@ struct Stripe {
 
     // address[] contribModuleAddr; //one loaded contrib module per messsage?
 
+    Contribution[] contribs;
+    /// batch together work into "Stripe" then attest to the whole stripe
     //intra-DAO credits
     Attestation[] attests;
-    /// batch together work into "Stripe" then attest to the whole stripe
-    Contribution[] contribs;
-    
     //if the stripe had an svg or png
     //long term - render rich svg
     string tokenURI;

@@ -9,6 +9,7 @@ import "./../structures/Stripe.sol";
 
 /// single badge contract with multiple token ids
 /// non-transfereble NFT
+/// Owner = BadgeFactory Contract
 contract Badge is Ownable, ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
@@ -19,12 +20,6 @@ contract Badge is Ownable, ERC721URIStorage {
     mapping(uint256 => Stripe[]) public stripesById;
     mapping(uint256 => uint256) public reputationById;
     mapping(uint256 => bool) private transferApprovalById; //option to enable transfers for certain members
-
-    ///@dev msg.sender = the attestor (must be inside DAO)
-    modifier onlyMember() {
-        require(balanceOf(msg.sender) != 0, "you are not in the DAO!");
-        _;
-    }
 
     constructor(string memory name, string memory symbol) ERC721(name, symbol) {
         //empty. sets up ERC721
@@ -40,7 +35,7 @@ contract Badge is Ownable, ERC721URIStorage {
         require(false, "Non-transferrable!");
     }
 
-    function mint(address to) {
+    function mint(address to) public onlyOwner {
         //DAO member 0 - indexed
         uint256 newItemId = _tokenIds.current();
         _tokenIds.increment();
@@ -49,11 +44,13 @@ contract Badge is Ownable, ERC721URIStorage {
         // memberId = newItemId; //this goes into owner field
     }
 
-    function contribNewStripe(uint256 memberId, Contribution memory contrib)
-        public
-        onlyOwner
-        returns (bool)
-    {}
+    function createNewStripe(
+        uint256 memberId,
+        Stripe memory stripe
+    ) public onlyOwner returns (bool) {
+        stripesById[memberId].push(stripe);
+        return true;
+    }
 
     /// @notice Add a contrib to your most recent stripe
     /// @dev Explain to a developer any extra details
@@ -65,7 +62,8 @@ contract Badge is Ownable, ERC721URIStorage {
         onlyOwner //BadgeFactory is the owner
         returns (bool)
     {
-        // stripesById.push();
+        Stripe storage lastStripe = getLatestStripe(memberId);
+        lastStripe.contribs.push(contrib);
     }
 
     /// @notice Add a contrib to specific stripe
@@ -76,7 +74,17 @@ contract Badge is Ownable, ERC721URIStorage {
         uint256 stripeId,
         Contribution memory contrib
     ) public onlyOwner returns (bool) {
-        // stripesById.push();
+        Stripe storage stripe = stripesById[memberId][stripeId];
+        stripe.contribs.push(contrib);
+    }
+
+    function editStripeMessage(
+        uint256 memberId,
+        uint256 stripeId,
+        string memory _message
+    ) private onlyOwner {
+        Stripe storage stripe = stripesById[memberId][stripeId];
+        stripe.message = _message;
     }
 
     /// @notice Add your attestation for the last stripe
@@ -85,26 +93,34 @@ contract Badge is Ownable, ERC721URIStorage {
     /// add attestation to existing stripe?
     /// always have attest add to the latest stripe
     /// inlcude func to add stripe to a user's list
-    function attestToLatest(uint256 memberId, Attestation memory attest)
-        public
-        onlyMember
+    function attestToLatestStripe(uint256 memberId, Attestation memory attest)
+        private
+        onlyOwner
         returns (bool)
     {
-        uint256 lastStripeId = stripesById[memberId].length - 1; //push var to the stack. Reading is cheap, memory is cheap (discarded), storing extremely expensive
-        Stripe lastStripe = stripesById[memberId][lastStripeId];
-
+        Stripe storage lastStripe = getLatestStripe(memberId);
         lastStripe.attests.push(attest);
         return true;
     }
 
-    function attestTo(
+    function attestToStripe(
         uint256 memberId,
         uint256 stripeId,
         Attestation memory attest
-    ) public onlyMember returns (bool) {
-        Stripe stripe = stripesById[memberId][stripeId];
-
+    ) private onlyOwner returns (bool) {
+        Stripe storage stripe = stripesById[memberId][stripeId];
         stripe.attests.push(attest);
         return true;
+    }
+
+    ///SECTION: UTILITY FUNCTIONS
+    ///@dev //push var to the stack. Reading is cheap, memory is cheap (discarded), storing extremely expensive
+    function getLatestStripe(uint256 memberId)
+        public
+        view
+        returns (Stripe calldata)
+    {
+        uint256 lastStripeId = stripesById[memberId].length - 1;
+        return stripesById[memberId][lastStripeId];
     }
 }
