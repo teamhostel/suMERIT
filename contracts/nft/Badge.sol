@@ -7,48 +7,104 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./../structures/Stripe.sol";
 
+/// single badge contract with multiple token ids
+/// non-transfereble NFT
 contract Badge is Ownable, ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-    Stripe[] public stripes;
-    uint256 public memberId;
+    //dao sets the theme for stripesById
+    //every member needs their own list of stripesById
+    //memberId = tokenId
+    mapping(uint256 => Stripe[]) public stripesById;
+    mapping(uint256 => uint256) public reputationById;
+    mapping(uint256 => bool) private transferApprovalById; //option to enable transfers for certain members
 
     ///@dev msg.sender = the attestor (must be inside DAO)
     modifier onlyMember() {
-        require(balanceOf(msg.sender) != 0);
+        require(balanceOf(msg.sender) != 0, "you are not in the DAO!");
         _;
     }
 
-    constructor(address to) ERC721("Badge", "BG") {
-        _tokenIds.increment();
+    constructor(string memory name, string memory symbol) ERC721(name, symbol) {
+        //empty. sets up ERC721
+    }
+
+    /// @notice SECURITY RISK: This NFT is non-transferrable
+    /// @dev non-transferrable badge: override _transfer
+    function _transfer(
+        address from,
+        address to,
+        uint256 tokenId //can choose to specify override contract
+    ) internal virtual override {
+        require(false, "Non-transferrable!");
+    }
+
+    function mint(address to) {
+        //DAO member 0 - indexed
         uint256 newItemId = _tokenIds.current();
+        _tokenIds.increment();
 
         _safeMint(to, newItemId);
-
-        memberId = newItemId;
+        // memberId = newItemId; //this goes into owner field
     }
 
-    function getAddressById(uint256 id) public view {}
+    function contribNewStripe(uint256 memberId, Contribution memory contrib)
+        public
+        onlyOwner
+        returns (bool)
+    {}
 
-    /// @notice Explain to an end user what this does
+    /// @notice Add a contrib to your most recent stripe
     /// @dev Explain to a developer any extra details
-    /// @param module address of the contrib module
-    function contrib(address module) public onlyOwner 
+    function contribToLatestStripe(
+        uint256 memberId,
+        Contribution memory contrib
+    )
+        public
+        onlyOwner //BadgeFactory is the owner
+        returns (bool)
     {
-        // stripes.push();
+        // stripesById.push();
     }
 
-    /// @notice Add your attestation for an input stripeId
+    /// @notice Add a contrib to specific stripe
+    /// @dev Explain to a developer any extra details
+    /// @param stripeId add contribution to specific stripe
+    function contribToStripe(
+        uint256 memberId,
+        uint256 stripeId,
+        Contribution memory contrib
+    ) public onlyOwner returns (bool) {
+        // stripesById.push();
+    }
+
+    /// @notice Add your attestation for the last stripe
     /// @dev Stripe struct contains contribs and attestations
     /// @return pass or fail
-    function attest(
+    /// add attestation to existing stripe?
+    /// always have attest add to the latest stripe
+    /// inlcude func to add stripe to a user's list
+    function attestToLatest(uint256 memberId, Attestation memory attest)
+        public
+        onlyMember
+        returns (bool)
+    {
+        uint256 lastStripeId = stripesById[memberId].length - 1; //push var to the stack. Reading is cheap, memory is cheap (discarded), storing extremely expensive
+        Stripe lastStripe = stripesById[memberId][lastStripeId];
+
+        lastStripe.attests.push(attest);
+        return true;
+    }
+
+    function attestTo(
+        uint256 memberId,
         uint256 stripeId,
-        address badgeOwner,
-        string memory message,
-        uint128 points
+        Attestation memory attest
     ) public onlyMember returns (bool) {
-        stripes[stripeId].attests.push(Attestation(msg.sender, message, uint128(block.timestamp), points));
+        Stripe stripe = stripesById[memberId][stripeId];
+
+        stripe.attests.push(attest);
         return true;
     }
 }
