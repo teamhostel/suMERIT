@@ -6,9 +6,11 @@ import "./structures/Stripe.sol";
 import "./nft/Badge.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-//badge factory allows you to see all the functions and permissions
-/// BFM - badge factory manager? contains module addresses. Allows construcing your DAO's custom badge factory. A factory for badge factory.
-/// benefit of factory: deploying contract is dead simple
+/// @notice badge factory allows you to interact with the Badge NFT contract!
+/// @dev BadgeFactory is Badge. hierarchical inheritance.
+/// @dev    BFM - badge factory manager will contains module addresses.
+///         Allows construcing your DAO's custom badge factory. A factory for badge factory.
+///         benefit of factory: deploying contract is dead simple
 contract BadgeFactory is
     Badge //ownable allows ownership transfer of contract
 {
@@ -21,12 +23,13 @@ contract BadgeFactory is
     /// SECTION: MODIFIERS
     /// MUST OWN A BADGE
     modifier onlyMember() {
-        require(balanceOf(msg.sender) != 0, "you are not in the DAO!");
+        require(balanceOf(msg.sender) > 0, "you are not in the DAO!");
         _;
     }
     ///MUST HOLD SPECIFIC BADGE ID
     modifier onlyHolder(uint256 id) {
-        require(ownerOf(id) == msg.sender, "You do not own this NFT!");
+        require(balanceOf(msg.sender) > 0, "you are not in the DAO!");
+        require(ownerOf(id) == msg.sender, "You do not own this Badge!");
         _;
     }
 
@@ -34,44 +37,29 @@ contract BadgeFactory is
     event NewBadge(address owner, uint256 memberId);
 
     // event NewFactory(address memory cont); //for BFM
-    /// DEPRECATED VARIABLES
-    // mapping(address => bool) memberWhitelist; //not needed because
-    ///require dao adds members, members can't add themselves. Don't allow members to mint their own badges.
-    // mapping(uint256 => address) public memberIdToAddress; //not needed because of func getAddressById
-    // address[] public badges; //this should be covered in memberIdToAddress
 
-    /// @param _token address for existing DAO token
-    /// @dev todo support more of the DAO stack: creating tokens
+    /**
+     * create Badge contract
+     * factory inherits Badge with IDs for member addresses
+     * @dev todo support more of the DAO stack: creating tokens
+     */
     constructor(
-        address _token,
-        string memory name,
-        string memory symbol,
-        string memory uri
+        string memory name, //badge or dao name
+        string memory symbol //TICKER SYM
     ) Badge(name, symbol) {
-        //create badge contract = each factory has one badge contract w/multiple ideas
-        daoToken = _token;
-        // badge = new Badge(name, symbol);
+        // _setTokenURI(tokenId, _tokenURI);
     }
 
     /// SECTION: Factory config functions
+    ///-----------------------------------
     /// @dev todo include trusted (onlyOwner) modifier (dao must deploy from their main multisig)
-    function setDaoTokenAddress(address _token) public onlyOwner {
-        daoToken = _token;
+    function setDaoTokenAddress(address token) public onlyOwner {
+        daoToken = token; //address for existing DAO token
+        ///@dev future function to mint badge for ALL TOKEN HOLDERS
     }
 
     /// SECTION: Badge Minting
-    ///@notice Factory mint a DAO badge
-    ///@dev free NFT for member fills in addrToMemberId
-    function _mintBadge(address owner) internal {
-        // Badge myBadge = Badge(_owner); //this is creating new contract on every mint
-        ///look up badge by Id, which returns address of owner
-        uint256 id = mint(owner);
-        addrToMemberId[owner] = id;
-        // memberIdToAddress[mymemberId()] = _owner;
-
-        emit NewBadge(owner, id);
-    }
-
+    ///-----------------------
     ///@notice add individual member
     ///@dev only gate the public fns
     function addDaoMember(address member) public onlyOwner {
@@ -86,14 +74,88 @@ contract BadgeFactory is
         }
     }
 
-    /// SECTION: VIEW FUNCTIONS
+    /// SECTION: VIEW
+    ///--------------
     function getAddressById(uint256 id) public view returns (address) {
         return ownerOf(id);
     }
 
-    ///
-    ///SECTION: Contribs and Attests
-    /// called by the contributor themselves
+    /// SECTION: Fast utility functions for tracking contribs.
+    ///@notice requires badge owner. Alt implementation allows DAO address to create stripes for members.
+    ///@dev intended to be called my member = msg.sender. NO NEED TO INSTANTIATE CONTRIBS OR ATTESTS
+    function makeNewStripe(string memory message, string memory uri)
+        external
+        onlyHolder(addrToMemberId[msg.sender])
+    {
+        uint256 id = addrToMemberId[msg.sender];
+        newStripeForId(id, message, uri);
+    }
+
+    /// SECTION: Add Contributions!
+    ///----------------------------
+    function contribToStripe(
+        uint256 memberId,
+        uint256 stripeId,
+        string memory message,
+        string memory contribType,
+        string memory uri
+    ) public onlyHolder(memberId) {
+        Contribution memory contrib;
+        ///@dev long-form more readable syntax
+        contrib.contributor = msg.sender;
+        contrib.time = block.timestamp;
+        contrib.message = message;
+        contrib.contribType = contribType;
+        contrib.uri = uri;
+        appendContribToStripe(memberId, stripeId, contrib);
+    }
+
+    function contribToLatestStripe(
+        uint256 memberId,
+        string memory message,
+        string memory contribType,
+        string memory uri
+    ) public onlyHolder(memberId) {
+        Contribution memory contrib = _createContrib(message, contribType, uri);
+        appendContribToLatestStripe(memberId, contrib);
+    }
+
+    /// SECTION: Add Attestations!
+    ///----------------------------
+    function attestToStripe(
+        uint256 stripeId,
+        uint256 memberId,
+        bool vote,
+        string memory message
+    ) public onlyMember {
+        Attestation memory attest = _createAttest(vote, message);
+        appendAttestToStripe(memberId, stripeId, attest);
+    }
+
+    function attestToLatestStripe(
+        uint256 memberId,
+        bool vote,
+        string memory message
+    ) public onlyMember {
+        Attestation memory attest = _createAttest(vote, message);
+        appendAttestToLatestStripe(memberId, attest);
+    }
+
+    ///SECTION: PRIVATE FUNCTIONS
+    ///--------------------------
+    ///@notice Factory mint a DAO badge
+    ///@dev free NFT for member fills in addrToMemberId
+    function _mintBadge(address owner) internal {
+        // Badge myBadge = Badge(_owner); //this is creating new contract on every mint
+        ///look up badge by Id, which returns address of owner
+        uint256 id = mint(owner);
+        addrToMemberId[owner] = id;
+        // memberIdToAddress[mymemberId()] = _owner;
+
+        emit NewBadge(owner, id);
+    }
+
+    /// called by public contrib functions
     function _createContrib(
         string memory message,
         string memory contribType,
@@ -101,9 +163,9 @@ contract BadgeFactory is
     ) private view returns (Contribution memory) {
         return
             Contribution(
-                msg.sender,
-                message,
+                msg.sender, //question: when you call inherited functions, does msg.sender == the highest level address? (EOA)
                 block.timestamp,
+                message,
                 contribType,
                 uri
             );
@@ -114,32 +176,6 @@ contract BadgeFactory is
         view
         returns (Attestation memory)
     {
-        return Attestation(msg.sender, vote, message, block.timestamp);
+        return Attestation(msg.sender, block.timestamp, vote, message);
     }
-
-    ///SECTION: Fast utility functions for tracking contribs.
-    ///@dev intended to be called my member = msg.sender. NO NEED TO INSTANTIATE CONTRIBS OR ATTESTS
-    function makeNewStripe(string memory message, string memory uri)
-        public
-        onlyHolder(addrToMemberId[msg.sender])
-    {
-        uint256 id = addrToMemberId[msg.sender];
-        newStripeForId(id, message, uri);
-    }
-
-    function contribToStripe(
-        uint256 stripeId,
-        address[] memory contributors,
-        string memory message,
-        string memory contribType,
-        string memory uri
-    ) public onlyMember {
-        require(contributors.length > 0, "must have contributors");
-    }
-
-    function contribToLatestStripe() public {}
-
-    function attestToStripe(uint256 stripeId) public {}
-
-    function attestToLatestStripe() public {}
 }

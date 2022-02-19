@@ -6,10 +6,10 @@ contract cAttestation {
     struct Attestation {
         ///@notice who is voting?
         address attestor;
+        uint256 time;
         ///@notice yes/no
         bool vote;
         ///@notice optional included message
         string message;
-        uint256 time;
     }
 }
