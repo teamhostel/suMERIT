@@ -50,75 +50,65 @@ contract Badge is
         // memberId = newItemId; //this goes into owner field
     }
 
+    /// @notice "mint" a new stripe for a member ID
     function newStripeForId(
         uint256 memberId,
         string memory message,
         string memory uri
-    ) internal returns (bool) {
+    ) internal {
         uint256 stripeId = stripesById[memberId].length;
-        // stripesById[memberId][stripesById[memberId].length - 1] = stripe;
         stripesById[memberId].push();
         stripesById[memberId][stripeId].message = message;
         stripesById[memberId][stripeId].uri = uri;
-        return true;
+    }
+
+    /// @notice Add a contrib to specific member's stripe
+    /// @dev append contrib to the mapping(uint256 => Contribution) contribs;
+    /// @param memberId the Badge NFT ID
+    /// @param stripeId ref specific stripe
+    /// @param contrib obj describing a Contribution
+    function appendContribToStripe(
+        uint256 memberId,
+        uint256 stripeId,
+        Contribution memory contrib
+    ) internal {
+        Stripe storage stripe = stripesById[memberId][stripeId];
+        stripe.contribs[stripe.contribSize] = contrib;
+        stripe.contribSize++;
     }
 
     /// @notice Add a contrib to your most recent stripe
     /// @dev Explain to a developer any extra details
-    function contribToLatestStripe(
+    function appendContribToLatestStripe(
         uint256 memberId,
         Contribution memory contrib
-    ) internal returns (bool) {
+    ) internal {
         uint256 stripeId = getLatestStripeId(memberId);
         Stripe storage stripe = stripesById[memberId][stripeId];
         stripe.contribs[stripe.contribSize] = contrib;
         stripe.contribSize++;
-        return true;
     }
 
-    /// @notice Add a contrib to specific stripe
-    /// @dev Explain to a developer any extra details
-    /// @param stripeId add contribution to specific stripe
-    function contribToStripe(
-        uint256 memberId,
-        uint256 stripeId,
-        Contribution memory contrib
-    ) internal returns (bool) {
-        // Stripe storage stripe = stripesById[memberId][stripeId];
-        // stripe.contribs[stripe.contribSize] = contrib;
-        // stripe.contribSize++;
-    }
-
-    function editStripeMessage(
-        uint256 memberId,
-        uint256 stripeId,
-        string memory _message
-    ) internal {
-        stripesById[memberId][stripeId].message = _message;
-    }
-
-    /// @notice Add your attestation for the last stripe
-    /// @dev Stripe struct contains contribs and attestations
-    /// @return pass or fail
-    /// add attestation to existing stripe?
-    /// always have attest add to the latest stripe
-    /// inlcude func to add stripe to a user's list
-    function attestToLatestStripe(uint256 memberId, Attestation memory attest)
-        internal
-        returns (bool)
-    {
-        uint256 stripeId = getLatestStripeId(memberId);
-        // stripesById[memberId][stripeId].attests.push(attest);
-        return true;
-    }
-
-    function attestToStripe(
+    function appendAttestToStripe(
         uint256 memberId,
         uint256 stripeId,
         Attestation memory attest
-    ) internal returns (bool) {
-        // stripesById[memberId][stripeId].attests.push(attest);
-        return true;
+    ) internal {
+        Stripe storage stripe = stripesById[memberId][stripeId];
+        stripe.attests[stripe.contribSize] = attest;
+        stripe.attestSize++;
+    }
+
+    /// @notice Add your attestation for the latest stripe!
+    /// @dev Stripe struct contains contribs and attestations
+    function appendAttestToLatestStripe(
+        uint256 memberId,
+        Attestation memory attest
+    ) internal {
+        uint256 stripeId = getLatestStripeId(memberId);
+        Stripe storage stripe = stripesById[memberId][stripeId];
+        stripe.attests[stripe.contribSize] = attest;
+        stripe.attestSize++;
     }
 
     ///SECTION: UTILITY FUNCTIONS

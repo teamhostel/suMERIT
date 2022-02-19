@@ -8,9 +8,9 @@ contract cContribution {
         ///@notice raid squads = address[] = a group of people who coordinate together often. Accountability partners.
         address contributor; //in case multiple stakeholder/peeps involved. First address = badge holder? Function to distribute cred internally?
         ///@notice on-chain contrib message
-        string message;
         ///@dev block.timestamp
         uint256 time;
+        string message;
         ///@notice DAO defined on-chain metadata
         string contribType;
         ///@dev pointer to off-chain props storage.
