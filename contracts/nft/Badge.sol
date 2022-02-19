@@ -12,7 +12,8 @@ import "./../structures/Stripe.sol";
 /// Owner = BadgeFactory Contract
 contract Badge is
     Ownable,
-    ERC721URIStorage //for storing remote ref in NFT
+    ERC721URIStorage, //for storing remote ref in NFT
+    cStripe
 {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
@@ -22,6 +23,7 @@ contract Badge is
     mapping(uint256 => Stripe[]) public stripesById;
     mapping(uint256 => uint256) public reputationById;
     mapping(uint256 => bool) private transferApprovalById; //option to enable transfers for certain members
+    mapping(uint256 => string) public discordUsernameById; ///store discord username per badge ID. Then, gelato can automate pushing discord contrib messages to badges! Saving members gas
 
     constructor(string memory name, string memory symbol) ERC721(name, symbol) {
         //empty. sets up ERC721
@@ -37,7 +39,7 @@ contract Badge is
         require(false, "Non-transferrable!");
     }
 
-    function mint(address to) external onlyOwner returns (uint256) {
+    function mint(address to) internal onlyOwner returns (uint256) {
         //DAO member 0 - indexed
         uint256 newItemId = _tokenIds.current();
         _tokenIds.increment();
@@ -47,14 +49,16 @@ contract Badge is
         // memberId = newItemId; //this goes into owner field
     }
 
-    function createNewStripe(uint256 memberId, Stripe storage stripe)
-        internal
-        onlyOwner
-        returns (bool)
-    {
-        uint idx = stripesById[memberId].length;
+    function newStripeForId(
+        uint256 memberId,
+        string memory message,
+        string memory uri
+    ) internal onlyOwner returns (bool) {
+        uint256 stripeId = stripesById[memberId].length;
         // stripesById[memberId][stripesById[memberId].length - 1] = stripe;
         stripesById[memberId].push();
+        stripesById[memberId][stripeId].message = message;
+        stripesById[memberId][stripeId].uri = uri;
         return true;
     }
 
@@ -69,10 +73,10 @@ contract Badge is
         returns (bool)
     {
         uint256 stripeId = getLatestStripeId(memberId);
-        stripesById[memberId][stripeId].contribs[
-            stripesById[memberId][stripeId].contribSize
-        ] = contrib;
-        stripesById[memberId][stripeId].contribSize++;
+        Stripe storage stripe = stripesById[memberId][stripeId];
+        stripe.contribs[stripe.contribSize] = contrib;
+        stripe.contribSize++;
+        return true;
     }
 
     /// @notice Add a contrib to specific stripe

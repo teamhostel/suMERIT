@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity <= 0.8.9;
+pragma solidity <=0.8.9;
 import "./structures/Attestation.sol";
 import "./structures/Contribution.sol";
 import "./structures/Stripe.sol";
@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// BFM - badge factory manager? contains module addresses. Allows construcing your DAO's custom badge factory. A factory for badge factory.
 /// benefit of factory: deploying contract is dead simple
 contract BadgeFactory is
-    Ownable //ownable allows ownership transfer of contract
+    Badge //ownable allows ownership transfer of contract
 {
     /// SECTION: FACTORY STORAGE
     address private daoToken;
@@ -21,12 +21,12 @@ contract BadgeFactory is
     /// SECTION: MODIFIERS
     /// MUST OWN A BADGE
     modifier onlyMember() {
-        require(badge.balanceOf(msg.sender) != 0, "you are not in the DAO!");
+        require(balanceOf(msg.sender) != 0, "you are not in the DAO!");
         _;
     }
     ///MUST HOLD SPECIFIC BADGE ID
     modifier onlyHolder(uint256 id) {
-        require(badge.ownerOf(id) == msg.sender, "You do not own this NFT!");
+        require(ownerOf(id) == msg.sender, "You do not own this NFT!");
         _;
     }
 
@@ -47,10 +47,10 @@ contract BadgeFactory is
         string memory name,
         string memory symbol,
         string memory uri
-    ) {
+    ) Badge(name, symbol) {
         //create badge contract = each factory has one badge contract w/multiple ideas
         daoToken = _token;
-        badge = new Badge(name, symbol);
+        // badge = new Badge(name, symbol);
     }
 
     /// SECTION: Factory config functions
@@ -65,9 +65,9 @@ contract BadgeFactory is
     function _mintBadge(address owner) internal {
         // Badge myBadge = Badge(_owner); //this is creating new contract on every mint
         ///look up badge by Id, which returns address of owner
-        uint256 id = badge.mint(owner);
+        uint256 id = mint(owner);
         addrToMemberId[owner] = id;
-        // memberIdToAddress[myBadge.memberId()] = _owner;
+        // memberIdToAddress[mymemberId()] = _owner;
 
         emit NewBadge(owner, id);
     }
@@ -88,21 +88,20 @@ contract BadgeFactory is
 
     /// SECTION: VIEW FUNCTIONS
     function getAddressById(uint256 id) public view returns (address) {
-        return badge.ownerOf(id);
+        return ownerOf(id);
     }
 
     ///
     ///SECTION: Contribs and Attests
     /// called by the contributor themselves
     function _createContrib(
-        address[] memory contributors,
         string memory message,
         string memory contribType,
         string memory uri
-    ) private returns (Contribution memory) {
+    ) private view returns (Contribution memory) {
         return
             Contribution(
-                contributors,
+                msg.sender,
                 message,
                 block.timestamp,
                 contribType,
@@ -110,12 +109,12 @@ contract BadgeFactory is
             );
     }
 
-    function _createAttest(
-        string memory message,
-        int256 points,
-        string memory uri
-    ) private returns (Attestation memory) {
-        return Attestation(msg.sender, message, block.timestamp, points, uri);
+    function _createAttest(bool vote, string memory message)
+        private
+        view
+        returns (Attestation memory)
+    {
+        return Attestation(msg.sender, vote, message, block.timestamp);
     }
 
     ///SECTION: Fast utility functions for tracking contribs.
@@ -124,11 +123,8 @@ contract BadgeFactory is
         public
         onlyHolder(addrToMemberId[msg.sender])
     {
-        Stripe storage stripe;
-        // stripe.message = message;
-        // stripe.uri = uri;
         uint256 id = addrToMemberId[msg.sender];
-        // badge.createNewStripe(id, stripe);
+        newStripeForId(id, message, uri);
     }
 
     function contribToStripe(
