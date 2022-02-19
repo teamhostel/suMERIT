@@ -6,9 +6,11 @@ import "./structures/Stripe.sol";
 import "./nft/Badge.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-//badge factory allows you to see all the functions and permissions
-/// BFM - badge factory manager? contains module addresses. Allows construcing your DAO's custom badge factory. A factory for badge factory.
-/// benefit of factory: deploying contract is dead simple
+/// @notice badge factory allows you to interact with the Badge NFT contract!
+/// @dev BadgeFactory is Badge. hierarchical inheritance.
+/// @dev    BFM - badge factory manager will contains module addresses.
+///         Allows construcing your DAO's custom badge factory. A factory for badge factory.
+///         benefit of factory: deploying contract is dead simple
 contract BadgeFactory is
     Badge //ownable allows ownership transfer of contract
 {
@@ -21,35 +23,33 @@ contract BadgeFactory is
     /// SECTION: MODIFIERS
     /// MUST OWN A BADGE
     modifier onlyMember() {
-        require(balanceOf(msg.sender) != 0, "you are not in the DAO!");
+        require(balanceOf(msg.sender) > 0, "you are not in the DAO!");
         _;
     }
     ///MUST HOLD SPECIFIC BADGE ID
     modifier onlyHolder(uint256 id) {
-        require(ownerOf(id) == msg.sender, "You do not own this NFT!");
+        require(balanceOf(msg.sender) > 0, "you are not in the DAO!");
+        require(ownerOf(id) == msg.sender, "You do not own this Badge!");
         _;
     }
 
     /// SECTION: EVENTS
     event NewBadge(address owner, uint256 memberId);
-
     // event NewFactory(address memory cont); //for BFM
-    /// DEPRECATED VARIABLES
-    // mapping(address => bool) memberWhitelist; //not needed because
-    ///require dao adds members, members can't add themselves. Don't allow members to mint their own badges.
-    // mapping(uint256 => address) public memberIdToAddress; //not needed because of func getAddressById
-    // address[] public badges; //this should be covered in memberIdToAddress
 
     /// @param _token address for existing DAO token
     /// @dev todo support more of the DAO stack: creating tokens
     constructor(
         address _token,
         string memory name,
-        string memory symbol,
-        string memory uri
+        string memory symbol
     ) Badge(name, symbol) {
-        //create badge contract = each factory has one badge contract w/multiple ideas
+        /**
+         * create Badge contract 
+         * factory inherits Badge with IDs for member addresses
+        */
         daoToken = _token;
+        // _setTokenURI(tokenId, _tokenURI);
         // badge = new Badge(name, symbol);
     }
 
@@ -101,7 +101,7 @@ contract BadgeFactory is
     ) private view returns (Contribution memory) {
         return
             Contribution(
-                msg.sender,
+                msg.sender, //question: when you call inherited functions, does msg.sender == the highest level address? (EOA)
                 message,
                 block.timestamp,
                 contribType,
@@ -118,9 +118,10 @@ contract BadgeFactory is
     }
 
     ///SECTION: Fast utility functions for tracking contribs.
+    ///@notice requires badge owner. Alt implementation allows DAO address to create stripes for members.
     ///@dev intended to be called my member = msg.sender. NO NEED TO INSTANTIATE CONTRIBS OR ATTESTS
     function makeNewStripe(string memory message, string memory uri)
-        public
+        external
         onlyHolder(addrToMemberId[msg.sender])
     {
         uint256 id = addrToMemberId[msg.sender];

@@ -4,12 +4,13 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-
 import "./../structures/Stripe.sol";
 
-/// single badge contract with multiple token ids
-/// non-transfereble NFT
-/// Owner = BadgeFactory Contract
+/**
+ * single badge contract with multiple token ids
+ * non-transfereble NFT
+ * Owner = BadgeFactory Contract
+ */
 contract Badge is
     Ownable,
     ERC721URIStorage, //for storing remote ref in NFT
@@ -39,7 +40,7 @@ contract Badge is
         require(false, "Non-transferrable!");
     }
 
-    function mint(address to) internal onlyOwner returns (uint256) {
+    function mint(address to) internal returns (uint256) {
         //DAO member 0 - indexed
         uint256 newItemId = _tokenIds.current();
         _tokenIds.increment();
@@ -53,7 +54,7 @@ contract Badge is
         uint256 memberId,
         string memory message,
         string memory uri
-    ) internal onlyOwner returns (bool) {
+    ) internal returns (bool) {
         uint256 stripeId = stripesById[memberId].length;
         // stripesById[memberId][stripesById[memberId].length - 1] = stripe;
         stripesById[memberId].push();
@@ -67,11 +68,7 @@ contract Badge is
     function contribToLatestStripe(
         uint256 memberId,
         Contribution memory contrib
-    )
-        external
-        onlyOwner //BadgeFactory is the owner
-        returns (bool)
-    {
+    ) internal returns (bool) {
         uint256 stripeId = getLatestStripeId(memberId);
         Stripe storage stripe = stripesById[memberId][stripeId];
         stripe.contribs[stripe.contribSize] = contrib;
@@ -86,7 +83,7 @@ contract Badge is
         uint256 memberId,
         uint256 stripeId,
         Contribution memory contrib
-    ) external onlyOwner returns (bool) {
+    ) internal returns (bool) {
         // Stripe storage stripe = stripesById[memberId][stripeId];
         // stripe.contribs[stripe.contribSize] = contrib;
         // stripe.contribSize++;
@@ -96,7 +93,7 @@ contract Badge is
         uint256 memberId,
         uint256 stripeId,
         string memory _message
-    ) external onlyOwner {
+    ) internal {
         stripesById[memberId][stripeId].message = _message;
     }
 
@@ -107,8 +104,7 @@ contract Badge is
     /// always have attest add to the latest stripe
     /// inlcude func to add stripe to a user's list
     function attestToLatestStripe(uint256 memberId, Attestation memory attest)
-        external
-        onlyOwner
+        internal
         returns (bool)
     {
         uint256 stripeId = getLatestStripeId(memberId);
@@ -120,7 +116,7 @@ contract Badge is
         uint256 memberId,
         uint256 stripeId,
         Attestation memory attest
-    ) external onlyOwner returns (bool) {
+    ) internal returns (bool) {
         // stripesById[memberId][stripeId].attests.push(attest);
         return true;
     }
