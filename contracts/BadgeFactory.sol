@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.8.10;
+pragma solidity <= 0.8.9;
 import "./structures/Attestation.sol";
 import "./structures/Contribution.sol";
 import "./structures/Stripe.sol";
@@ -24,7 +24,6 @@ contract BadgeFactory is
         require(badge.balanceOf(msg.sender) != 0, "you are not in the DAO!");
         _;
     }
-
     ///MUST HOLD SPECIFIC BADGE ID
     modifier onlyHolder(uint256 id) {
         require(badge.ownerOf(id) == msg.sender, "You do not own this NFT!");
@@ -51,7 +50,7 @@ contract BadgeFactory is
     ) {
         //create badge contract = each factory has one badge contract w/multiple ideas
         daoToken = _token;
-        badge = Badge(name, symbol);
+        badge = new Badge(name, symbol);
     }
 
     /// SECTION: Factory config functions
@@ -63,20 +62,20 @@ contract BadgeFactory is
     /// SECTION: Badge Minting
     ///@notice Factory mint a DAO badge
     ///@dev free NFT for member fills in addrToMemberId
-    function _mintBadge(address _owner) internal {
+    function _mintBadge(address owner) internal {
         // Badge myBadge = Badge(_owner); //this is creating new contract on every mint
         ///look up badge by Id, which returns address of owner
-
-        ///@dev relevant mappings for easy access
-        addrToMemberId[_owner] = badge.memberId();
+        uint256 id = badge.mint(owner);
+        addrToMemberId[owner] = id;
         // memberIdToAddress[myBadge.memberId()] = _owner;
 
-        emit NewBadge(_owner, badge.memberId());
+        emit NewBadge(owner, id);
     }
 
     ///@notice add individual member
-    function addDaoMember(address _member) public onlyOwner {
-        _mintBadge(_member);
+    ///@dev only gate the public fns
+    function addDaoMember(address member) public onlyOwner {
+        _mintBadge(member);
     }
 
     /// the DAO says these are our members: address[]
@@ -92,6 +91,7 @@ contract BadgeFactory is
         return badge.ownerOf(id);
     }
 
+    ///
     ///SECTION: Contribs and Attests
     /// called by the contributor themselves
     function _createContrib(
@@ -119,20 +119,31 @@ contract BadgeFactory is
     }
 
     ///SECTION: Fast utility functions for tracking contribs.
-    ///@dev intended to be called my member = msg.sender
-    function makeStripeAndContrib(
-        address[] memory contribs,
+    ///@dev intended to be called my member = msg.sender. NO NEED TO INSTANTIATE CONTRIBS OR ATTESTS
+    function makeNewStripe(string memory message, string memory uri)
+        public
+        onlyHolder(addrToMemberId[msg.sender])
+    {
+        Stripe storage stripe;
+        // stripe.message = message;
+        // stripe.uri = uri;
+        uint256 id = addrToMemberId[msg.sender];
+        // badge.createNewStripe(id, stripe);
+    }
+
+    function contribToStripe(
+        uint256 stripeId,
+        address[] memory contributors,
         string memory message,
         string memory contribType,
         string memory uri
-    ) public onlyHolder(addrToMemberId[msg.sender]) {
-        //include the sender in the contribs array
-        uint256 id = addrToMemberId[msg.sender];
-        address[] memory contributors = msg.sender;
-        contributors.push(contribs);
-        badge.contribNewStripe(
-            id,
-            _createContrib(contributors, message, contribType, uri)
-        );
+    ) public onlyMember {
+        require(contributors.length > 0, "must have contributors");
     }
+
+    function contribToLatestStripe() public {}
+
+    function attestToStripe(uint256 stripeId) public {}
+
+    function attestToLatestStripe() public {}
 }

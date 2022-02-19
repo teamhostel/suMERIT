@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity <= 0.8.9;
 /// (require some # of attestations to post a contrib?)
 struct Attestation {
     address attestor;

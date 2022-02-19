@@ -1,6 +1,6 @@
 // contracts/structures/Stripe.sol
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity <= 0.8.9;
 
 import "./Attestation.sol";
 import "./Contribution.sol";
@@ -13,14 +13,17 @@ struct Stripe {
     //      possibly store on data availability layer
     //example: organizing a party (manual) ++ notion explainer docs related to party
     //both of these contributions should be in the same stripe. Each one has module address.
-
     // address[] contribModuleAddr; //one loaded contrib module per messsage?
 
-    Contribution[] contribs;
+    // Contribution[] contribs; //array of struct
+    mapping(uint256 => Contribution) contribs;
+    uint256 contribSize;
     /// batch together work into "Stripe" then attest to the whole stripe
     //intra-DAO credits
-    Attestation[] attests;
+    // Attestation[] attests;
+    mapping(uint256 => Attestation) attests;
+    uint256 attestSize;
     //if the stripe had an svg or png
     //long term - render rich svg
-    string tokenURI;
+    string uri;
 }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.8.10;
+pragma solidity <=0.8.9;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -10,13 +10,15 @@ import "./../structures/Stripe.sol";
 /// single badge contract with multiple token ids
 /// non-transfereble NFT
 /// Owner = BadgeFactory Contract
-contract Badge is Ownable, ERC721URIStorage {
+contract Badge is
+    Ownable,
+    ERC721URIStorage //for storing remote ref in NFT
+{
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
     //dao sets the theme for stripesById
     //every member needs their own list of stripesById
-    //memberId = tokenId
     mapping(uint256 => Stripe[]) public stripesById;
     mapping(uint256 => uint256) public reputationById;
     mapping(uint256 => bool) private transferApprovalById; //option to enable transfers for certain members
@@ -35,20 +37,24 @@ contract Badge is Ownable, ERC721URIStorage {
         require(false, "Non-transferrable!");
     }
 
-    function mint(address to) public onlyOwner {
+    function mint(address to) external onlyOwner returns (uint256) {
         //DAO member 0 - indexed
         uint256 newItemId = _tokenIds.current();
         _tokenIds.increment();
 
         _safeMint(to, newItemId);
+        return newItemId;
         // memberId = newItemId; //this goes into owner field
     }
 
-    function createNewStripe(
-        uint256 memberId,
-        Stripe memory stripe
-    ) public onlyOwner returns (bool) {
-        stripesById[memberId].push(stripe);
+    function createNewStripe(uint256 memberId, Stripe storage stripe)
+        internal
+        onlyOwner
+        returns (bool)
+    {
+        uint idx = stripesById[memberId].length;
+        // stripesById[memberId][stripesById[memberId].length - 1] = stripe;
+        stripesById[memberId].push();
         return true;
     }
 
@@ -58,12 +64,15 @@ contract Badge is Ownable, ERC721URIStorage {
         uint256 memberId,
         Contribution memory contrib
     )
-        public
+        external
         onlyOwner //BadgeFactory is the owner
         returns (bool)
     {
-        Stripe storage lastStripe = getLatestStripe(memberId);
-        lastStripe.contribs.push(contrib);
+        uint256 stripeId = getLatestStripeId(memberId);
+        stripesById[memberId][stripeId].contribs[
+            stripesById[memberId][stripeId].contribSize
+        ] = contrib;
+        stripesById[memberId][stripeId].contribSize++;
     }
 
     /// @notice Add a contrib to specific stripe
@@ -73,18 +82,18 @@ contract Badge is Ownable, ERC721URIStorage {
         uint256 memberId,
         uint256 stripeId,
         Contribution memory contrib
-    ) public onlyOwner returns (bool) {
-        Stripe storage stripe = stripesById[memberId][stripeId];
-        stripe.contribs.push(contrib);
+    ) external onlyOwner returns (bool) {
+        // Stripe storage stripe = stripesById[memberId][stripeId];
+        // stripe.contribs[stripe.contribSize] = contrib;
+        // stripe.contribSize++;
     }
 
     function editStripeMessage(
         uint256 memberId,
         uint256 stripeId,
         string memory _message
-    ) private onlyOwner {
-        Stripe storage stripe = stripesById[memberId][stripeId];
-        stripe.message = _message;
+    ) external onlyOwner {
+        stripesById[memberId][stripeId].message = _message;
     }
 
     /// @notice Add your attestation for the last stripe
@@ -94,12 +103,12 @@ contract Badge is Ownable, ERC721URIStorage {
     /// always have attest add to the latest stripe
     /// inlcude func to add stripe to a user's list
     function attestToLatestStripe(uint256 memberId, Attestation memory attest)
-        private
+        external
         onlyOwner
         returns (bool)
     {
-        Stripe storage lastStripe = getLatestStripe(memberId);
-        lastStripe.attests.push(attest);
+        uint256 stripeId = getLatestStripeId(memberId);
+        // stripesById[memberId][stripeId].attests.push(attest);
         return true;
     }
 
@@ -107,20 +116,14 @@ contract Badge is Ownable, ERC721URIStorage {
         uint256 memberId,
         uint256 stripeId,
         Attestation memory attest
-    ) private onlyOwner returns (bool) {
-        Stripe storage stripe = stripesById[memberId][stripeId];
-        stripe.attests.push(attest);
+    ) external onlyOwner returns (bool) {
+        // stripesById[memberId][stripeId].attests.push(attest);
         return true;
     }
 
     ///SECTION: UTILITY FUNCTIONS
     ///@dev //push var to the stack. Reading is cheap, memory is cheap (discarded), storing extremely expensive
-    function getLatestStripe(uint256 memberId)
-        public
-        view
-        returns (Stripe calldata)
-    {
-        uint256 lastStripeId = stripesById[memberId].length - 1;
-        return stripesById[memberId][lastStripeId];
+    function getLatestStripeId(uint256 memberId) public view returns (uint256) {
+        return stripesById[memberId].length - 1;
     }
 }
