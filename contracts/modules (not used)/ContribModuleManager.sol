@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.8.10;
+// contrib modules are oracles which bring off-chain data onto the badge on-chain resume
+// activate the contrib modules you would like, then query them 
+// why not simply include field link to contributions? why complicate it with modular contracts?
+// oracles are for trustless interactions
+pragma solidity <= 0.8.9;
 
 // import {ZoraProtocolFeeSettings} from "./auxiliary/ZoraProtocolFeeSettings/ZoraProtocolFeeSettings.sol";
 // import @openzeppelin/contracts/token/ERC721/erc721.sol
