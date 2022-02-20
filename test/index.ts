@@ -4,6 +4,7 @@ import { Signer } from "ethers";
 import { ethers } from "hardhat";
 import { it } from "mocha";
 import { BadgeFactory } from "../typechain";
+import { Stripe } from "../typechain/Stripe";
 describe("suMERIT Contracts", function () {
   // Mocha has four functions that let you hook into the the test runner's
   // lifecyle. These are: `before`, `beforeEach`, `after`, `afterEach`.
@@ -70,18 +71,23 @@ describe("suMERIT Contracts", function () {
       const mycoTrib = "Myco did a lotta drawing";
       await bf.connect(futuretrees).addNewStripe(peyTrib, "ipfs::");
       await bf.connect(myco).addNewStripe(mycoTrib, "ipfs::");
+
       expect(await bf.getStripeMessageById(0, 0)).to.equal(peyTrib);
       expect(await bf.getStripeUriById(0, 0)).to.equal("ipfs::");
+      expect((await bf.stripesById(0, 0)).contribSize).to.equal(0);
+      expect((await bf.stripesById(0, 0)).attestSize).to.equal(0);
       expect(await bf.getStripeMessageById(1, 0)).to.equal(mycoTrib);
+      expect((await bf.stripesById(1, 0)).contribSize).to.equal(0);
     });
 
     it("Should add contributions and view them", async function appendContribs() {
       const contribMsg = "I am writing test cases for our hack";
       //test contrib to specific stripe
       bf.connect(futuretrees).contribToStripe(0, "I am writing test cases for our hack", "solidity", "ipfs::");
-      // expect(await bf.messageOf(await bf.getContribById(0, 0, 0))).to.equal(contribMsg);
-      // expect((await bf.stripesById(0, 0)).contribs[0]); //problem: cannot reference the mappings inside
-      expect(await bf.getContribMessage(0,0,0)).to.equal(contribMsg);
+
+      const mymessage = await bf.connect(owner).getContribMessage(0, 0, 0); //had to specify explicitly connecting with wallet address
+      expect(mymessage).to.equal(contribMsg);
+      console.log("\tMy message:  ", mymessage);
     })
   });
 
