@@ -1,16 +1,20 @@
 import { useEffect } from 'react';
 import { useState } from 'react';
-import logo from './logo.svg';
+import { ethers } from "ethers";
 import './App.css';
 import contract from './contracts/BadgeFactory.json';
+import BadgeCreationForm from './BadgeCreationForm';
+import MeritSubmitForm from './MeritSubmitForm';
+import { ContractFactory } from 'ethers';
 
-const contractAddress = "0x";
+const badgeFactoryOwner = "";
 const abi = contract.abi;
 
 function App() {
-  const [currentAccount, setCurrentAccount] = useState(null);
 
-  const checkWalletIsConnected = () => {
+  const [currentAccount, setCurrentAccount, balance] = useState(null);
+
+  const checkWalletIsConnected = async () => {
     const { ethereum } = window;
 
     if (!ethereum){
@@ -18,6 +22,16 @@ function App() {
       return;
     }else{
       console.log("Wallet exists!")
+    }
+
+    const accounts = await ethereum.request({ method: 'eth_accounts' });
+
+    if (accounts.length !== 0) {
+      const account = accounts[0];
+      console.log("Found an authorized account: ", account);
+      setCurrentAccount(account);
+    }else{
+      console.log("Not Authorized");
     }
   }
 
@@ -33,12 +47,36 @@ function App() {
       console.log("Found an account: ", accounts[0]);
       setCurrentAccount(accounts[0]);
     }catch (err){
-      console.log(err)
+      alert(err.message)
     }
 
   }
 
-  const mintNftHandler = () => { }
+  const mintBadge = async() => {
+    try{
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const nftContract = new ethers.Contract(badgeFactoryOwner, abi, signer);
+
+        console.log("Initialize Payment");
+        const memberAddress = "0x2c2D987Df8ffbe670C32cC80a56DdB76c0CffED7";
+        let nftTxn = await nftContract.addDaoMember(memberAddress);
+
+        console.log("Minting...");
+        await nftTxn.wait();
+
+        console.log(`Minted, see transaction: https://stardust-explorer.metis.io/tx/${nftTxn.hash}/internal-transactions`);
+      } else {
+        console.log("Ethereum object does not exist");
+      }
+    } catch (err) {
+      alert(err.message);
+    }
+
+  }
 
   const connectWalletButton = () => {
     return (
@@ -48,29 +86,85 @@ function App() {
     )
   }
 
-  const mintNftButton = () => {
+const deployBadgeFactory = async () => {
+
+  try{
+    const { ethereum } = window;
+
+  const provider = new ethers.providers.Web3Provider(ethereum);
+  const signer = provider.getSigner();
+
+      const factory = new ContractFactory(abi, contract.bytecode, signer);
+
+      // If your contract requires constructor args, you can specify them here
+      const factoryContract = await factory.deploy('suMERIT', 'SUM', 'https://bafybeidxwh2zr5yvmlel6vqlqv3lkjpselleyobjdejg7v55cyeipinb5a.ipfs.dweb.link/');
+
+      console.log(factoryContract.address);
+      console.log(factoryContract.deployTransaction);
+
+  }catch (err) {
+    alert(err.message);
+  }
+}
+
+  const deployFactoryButton = () => {
     return (
-      <button onClick={mintNftHandler} className='cta-button mint-nft-button'>
+      <button onClick={deployBadgeFactory} className='cta-button connect-wallet-button'>
+        Deploy DAO Factory Contract
+      </button>
+    )
+  }
+
+  const mintBadgeButton = () => {
+    return (
+      <button onClick={mintBadge} className='cta-button mint-nft-button'>
         Mint NFT
       </button>
     )
   }
+
+  const getBalance = async() => {
+    const { ethereum } = window;
+    const provider = new ethers.providers.Web3Provider(ethereum);
+    const balance = await provider.getBalance("ethers.eth");
+    return balance
+  }
+
   return (
+
     <div className="App">
-      <header className="App-header">
-        <h1>MERIT - Contribute to the power of the DAO</h1>
 
-
-    <div className='main-app'>
-      <h1></h1>
-      <div>
-        {connectWalletButton()}
+      <div className='container text-white p-8'>
+        <h1>suMERIT - Contribute to the power of the DAO</h1>
+        <p> {currentAccount} </p>
+        <p>{balance} </p>
+        {currentAccount ? "" : connectWalletButton()}
       </div>
+
+      <div className='container'>
+        <div className="grid grid-cols gap-4">
+          <div className="bg-white shadow-lg p-4 shadow-xl rounded">
+          <h2 className="uppercase font-black">Create Badge Factory</h2>
+          {deployFactoryButton()}
+          </div>
+          <div className="bg-white shadow-lg p-4 shadow-xl rounded">
+            <h2 className="uppercase font-black">DAO Way</h2>
+            <p className="text-sm text-left">This is the way of the DAO. A DAO should follow this path in order to mint their Badge Factory. Once a Badge Factory is created and the design of the DAO's badge is finalized all members will be able to mint their individual badges.</p>
+
+            {mintBadgeButton()}
+          </div>
+          <div className="bg-white shadow-lg p-4 rounded">
+            <h2 className="uppercase font-black">Contrib Way</h2>
+            <p className="text-sm text-left">This is the way of the contributor. A contributor can mint a base badge for every DAO that they are a member of. Their contributions to the DAO can then be recognized as they earn their stripes. Each stripe is a minted SVG that includes the metadata of the attested contribution.
+            </p>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-      </header>
-    </div>
   );
+
 }
 
 export default App;
