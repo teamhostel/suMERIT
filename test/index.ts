@@ -78,8 +78,10 @@ describe("suMERIT Contracts", function () {
     it("Should add contributions and view them", async function appendContribs() {
       const contribMsg = "I am writing test cases for our hack";
       //test contrib to specific stripe
-      bf.connect(futuretrees).contribToStripe(0, 0, contribMsg, "solidity", "ipfs::");
-      expect(await bf.messageOf(await bf.getContribById(0, 0, 0))).to.equal(contribMsg);
+      bf.connect(futuretrees).contribToStripe(0, "I am writing test cases for our hack", "solidity", "ipfs::");
+      // expect(await bf.messageOf(await bf.getContribById(0, 0, 0))).to.equal(contribMsg);
+      // expect((await bf.stripesById(0, 0)).contribs[0]); //problem: cannot reference the mappings inside
+      expect(await bf.getContribMessage(0,0,0)).to.equal(contribMsg);
     })
   });
 

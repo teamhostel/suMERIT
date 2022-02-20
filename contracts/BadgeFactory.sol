@@ -96,12 +96,20 @@ contract BadgeFactory is
         return stripesById[memberId][stripeId].uri;
     }
 
-    function getContribById(
+    function _getContribById(
         uint256 memberId,
         uint256 stripeId,
         uint256 contribId
-    ) public view returns (Contribution memory) {
+    ) private view returns (Contribution memory) {
         return stripesById[memberId][stripeId].contribs[contribId];
+    }
+
+    function getContribMessage(
+        uint256 memberId,
+        uint256 stripeId,
+        uint256 contribId
+    ) public view returns (string memory) {
+        return _getContribById(memberId, stripeId, contribId).message;
     }
 
     function getAttestById(
@@ -126,12 +134,11 @@ contract BadgeFactory is
     /// SECTION: Add Contributions!
     ///----------------------------
     function contribToStripe(
-        uint256 memberId,
         uint256 stripeId,
         string memory message,
         string memory contribType,
         string memory uri
-    ) public onlyHolder(memberId) {
+    ) public onlyHolder(addrToMemberId[msg.sender]) {
         Contribution memory contrib;
         ///@dev long-form more readable syntax
         contrib.contributor = msg.sender;
@@ -139,6 +146,8 @@ contract BadgeFactory is
         contrib.message = message;
         contrib.contribType = contribType;
         contrib.uri = uri;
+        uint256 memberId = addrToMemberId[msg.sender];
+
         appendContribToStripe(memberId, stripeId, contrib);
     }
 

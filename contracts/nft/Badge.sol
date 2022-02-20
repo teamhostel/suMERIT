@@ -21,8 +21,9 @@ contract Badge is
 
     //dao sets the theme for stripesById
     //every member needs their own list of stripesById
-    mapping(uint256 => Stripe[]) public stripesById;
-    mapping(uint256 => uint256) public reputationById;
+    mapping(uint256 => mapping(uint256 => Stripe)) public stripesById;
+    mapping(uint256 => uint256) public stripeCount;
+    // mapping(uint256 => uint256) public reputationById;
     mapping(uint256 => bool) private transferApprovalById; //option to enable transfers for certain members
     mapping(uint256 => string) public discordUsernameById; ///store discord username per badge ID. Then, gelato can automate pushing discord contrib messages to badges! Saving members gas
 
@@ -51,19 +52,21 @@ contract Badge is
     }
 
     /// @notice "mint" a new stripe for a member ID
+    /// @dev stripesById is a 2d nested mapping for Stripes for everyone!
     function newStripeForId(
         uint256 memberId,
         string memory message,
         string memory uri
     ) internal {
-        uint256 stripeId = stripesById[memberId].length;
-        stripesById[memberId].push();
-
-        stripesById[memberId][stripeId].message = message;
-        stripesById[memberId][stripeId].uri = uri;
-        stripesById[memberId][stripeId].message = message;
-        stripesById[memberId][stripeId].contribSize = 0;
-        stripesById[memberId][stripeId].attestSize = 0;
+        // uint256 stripeId = stripesById[memberId].length;
+        // stripesById[memberId].push();
+        uint256 myStripes = stripeCount[memberId];
+        stripesById[memberId][myStripes].message = message;
+        stripesById[memberId][myStripes].uri = uri;
+        stripesById[memberId][myStripes].message = message;
+        stripesById[memberId][myStripes].contribSize = 0;
+        stripesById[memberId][myStripes].attestSize = 0;
+        stripeCount[memberId]++;
     }
 
     /// @notice Add a contrib to specific member's stripe
@@ -119,6 +122,7 @@ contract Badge is
     ///SECTION: UTILITY FUNCTIONS
     ///@dev //push var to the stack. Reading is cheap, memory is cheap (discarded), storing extremely expensive
     function getLatestStripeId(uint256 memberId) public view returns (uint256) {
-        return stripesById[memberId].length - 1;
+        require(stripeCount[memberId] > 0);
+        return stripeCount[memberId] - 1;
     }
 }
