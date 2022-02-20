@@ -119,10 +119,30 @@ contract Badge is
         stripe.attestSize++;
     }
 
-    ///SECTION: UTILITY FUNCTIONS
+    ///SECTION: VIEW FUNCTIONS
     ///@dev //push var to the stack. Reading is cheap, memory is cheap (discarded), storing extremely expensive
     function getLatestStripeId(uint256 memberId) public view returns (uint256) {
-        require(stripeCount[memberId] > 0, "Go and add your first stripe!");
+        require(stripeCount[memberId] > 0, "Go and add your first Stripe!");
         return stripeCount[memberId] - 1;
+    }
+
+    function getStripeCount(uint256 memberId) public view returns (uint256) {
+        return stripeCount[memberId];
+    }
+
+    function getContribMessagesById(uint256 memberId, uint256 stripeId)
+        public
+        view
+        returns (string[] memory)
+    {
+        uint256 size = stripesById[memberId][stripeId].contribSize;
+        string[] memory messages = new string[](size);
+        for (uint256 index = 0; index < size; index++) {
+            string memory message = stripesById[memberId][stripeId]
+                .contribs[index]
+                .message;
+            messages[index] = message;
+        }
+        return messages;
     }
 }
