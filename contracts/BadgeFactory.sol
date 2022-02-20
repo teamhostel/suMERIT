@@ -4,7 +4,9 @@ import "./structures/Attestation.sol";
 import "./structures/Contribution.sol";
 import "./structures/Stripe.sol";
 import "./nft/Badge.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+
+// string constant ipfs  = "ipfs://";
 
 /// @notice badge factory allows you to interact with the Badge NFT contract!
 /// @dev BadgeFactory is Badge. hierarchical inheritance.
@@ -16,6 +18,7 @@ contract BadgeFactory is
 {
     /// SECTION: FACTORY STORAGE
     address private daoToken;
+    string public baseURI;
     Badge private badge; //NFT contract! address behind the scenes (it's also a contract that looks like badge interface)
     /// @notice return the DAO member Id for an address
     mapping(address => address) public addrToBadgeFactory;
@@ -36,6 +39,7 @@ contract BadgeFactory is
 
     /// SECTION: EVENTS
     event NewBadge(address owner, uint256 memberId);
+
     // event NewFactory(address memory cont); //for BFM
 
     /**
@@ -45,15 +49,16 @@ contract BadgeFactory is
      */
     constructor(
         string memory name, //badge or dao name
-        string memory symbol //TICKER SYM
+        string memory symbol, //TICKER SYM
+        string memory uri
     ) Badge(name, symbol) {
+        baseURI = uri;
         addrToBadgeFactory[msg.sender] = address(this);
         // _setTokenURI(tokenId, _tokenURI);
     }
 
     /// SECTION: Factory config functions
     ///-----------------------------------
-    /// @dev todo include trusted (onlyOwner) modifier (dao must deploy from their main multisig)
     function setDaoTokenAddress(address token) public onlyOwner {
         daoToken = token; //address for existing DAO token
         ///@dev future function to mint badge for ALL TOKEN HOLDERS
@@ -64,7 +69,12 @@ contract BadgeFactory is
     ///@notice add individual member
     ///@dev only gate the public fns
     function addDaoMember(address member) public onlyOwner {
-        _mintBadge(member);
+        _mintBadge(member, baseURI);
+    }
+
+    ///@dev in tandem with getStripeCount(uint256 memberId), use this to change the badge every stripe!
+    function editBadgeURI(uint256 id, string memory uri) public {
+        _setTokenURI(id, uri);
     }
 
     /// the DAO says these are our members: address[]
@@ -172,12 +182,17 @@ contract BadgeFactory is
     /// SECTION: Fast utility functions for tracking contribs.
     ///@notice requires badge owner. Alt implementation allows DAO address to create stripes for members.
     ///@dev intended to be called my member = msg.sender. NO NEED TO INSTANTIATE CONTRIBS OR ATTESTS
-    function addNewStripe(string memory message, string memory uri)
+    function addNewStripe(string memory message, string memory stripeURI)
         external
         onlyHolder(addrToMemberId[msg.sender])
     {
         uint256 id = addrToMemberId[msg.sender];
-        newStripeForId(id, message, uri);
+        newStripeForId(id, message, stripeURI);
+
+        //default URI editing scheme
+        uint256 stripeCount = getStripeCount(id);
+        string memory uri = Strings.toString(stripeCount);
+        editBadgeURI(id, uri);
     }
 
     /// SECTION: Add Contributions!
@@ -201,12 +216,12 @@ contract BadgeFactory is
     }
 
     function contribToLatestStripe(
-        uint256 memberId,
         string memory message,
         string memory contribType,
         string memory uri
-    ) public onlyHolder(memberId) {
+    ) public onlyHolder(addrToMemberId[msg.sender]) {
         Contribution memory contrib = _createContrib(message, contribType, uri);
+        uint256 memberId = addrToMemberId[msg.sender];
         appendContribToLatestStripe(memberId, contrib);
     }
 
@@ -235,11 +250,12 @@ contract BadgeFactory is
     ///--------------------------
     ///@notice Factory mint a DAO badge
     ///@dev free NFT for member fills in addrToMemberId
-    function _mintBadge(address owner) internal {
+    function _mintBadge(address owner, string memory tokenURI) internal {
         // Badge myBadge = Badge(_owner); //this is creating new contract on every mint
         ///look up badge by Id, which returns address of owner
         require(addrToMemberId[owner] == 0, "You already own a DAO badge!");
         uint256 id = mint(owner);
+        _setTokenURI(id, tokenURI);
         addrToMemberId[owner] = id;
         emit NewBadge(owner, id);
     }
