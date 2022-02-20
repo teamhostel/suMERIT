@@ -42,9 +42,9 @@ contract Badge is
     }
 
     function mint(address to) internal returns (uint256) {
-        //DAO member 0 - indexed
-        uint256 newItemId = _tokenIds.current();
+        //DAO member 1 - indexed
         _tokenIds.increment();
+        uint256 newItemId = _tokenIds.current();
 
         _safeMint(to, newItemId);
         return newItemId;
@@ -122,7 +122,7 @@ contract Badge is
     ///SECTION: UTILITY FUNCTIONS
     ///@dev //push var to the stack. Reading is cheap, memory is cheap (discarded), storing extremely expensive
     function getLatestStripeId(uint256 memberId) public view returns (uint256) {
-        require(stripeCount[memberId] > 0);
+        require(stripeCount[memberId] > 0, "Go and add your first stripe!");
         return stripeCount[memberId] - 1;
     }
 }

@@ -18,6 +18,7 @@ contract BadgeFactory is
     address private daoToken;
     Badge private badge; //NFT contract! address behind the scenes (it's also a contract that looks like badge interface)
     /// @notice return the DAO member Id for an address
+    mapping(address => address) public addrToBadgeFactory;
     mapping(address => uint256) public addrToMemberId;
 
     /// SECTION: MODIFIERS
@@ -35,7 +36,6 @@ contract BadgeFactory is
 
     /// SECTION: EVENTS
     event NewBadge(address owner, uint256 memberId);
-
     // event NewFactory(address memory cont); //for BFM
 
     /**
@@ -47,6 +47,7 @@ contract BadgeFactory is
         string memory name, //badge or dao name
         string memory symbol //TICKER SYM
     ) Badge(name, symbol) {
+        addrToBadgeFactory[msg.sender] = address(this);
         // _setTokenURI(tokenId, _tokenURI);
     }
 
@@ -96,12 +97,20 @@ contract BadgeFactory is
         return stripesById[memberId][stripeId].uri;
     }
 
-    function _getContribById(
+    function getContribAddress(
         uint256 memberId,
         uint256 stripeId,
         uint256 contribId
-    ) private view returns (Contribution memory) {
-        return stripesById[memberId][stripeId].contribs[contribId];
+    ) public view returns (address) {
+        return _getContribById(memberId, stripeId, contribId).contributor;
+    }
+
+    function getContribTime(
+        uint256 memberId,
+        uint256 stripeId,
+        uint256 contribId
+    ) public view returns (uint256) {
+        return _getContribById(memberId, stripeId, contribId).time;
     }
 
     function getContribMessage(
@@ -112,12 +121,52 @@ contract BadgeFactory is
         return _getContribById(memberId, stripeId, contribId).message;
     }
 
-    function getAttestById(
+    function getContribType(
+        uint256 memberId,
+        uint256 stripeId,
+        uint256 contribId
+    ) public view returns (string memory) {
+        return _getContribById(memberId, stripeId, contribId).contribType;
+    }
+
+    function getContribUri(
+        uint256 memberId,
+        uint256 stripeId,
+        uint256 contribId
+    ) public view returns (string memory) {
+        return _getContribById(memberId, stripeId, contribId).uri;
+    }
+
+    function getAttestAddress(
         uint256 memberId,
         uint256 stripeId,
         uint256 attestId
-    ) public view returns (Attestation memory) {
-        return stripesById[memberId][stripeId].attests[attestId];
+    ) public view returns (address) {
+        return _getAttestById(memberId, stripeId, attestId).attestor;
+    }
+
+    function getAttestTime(
+        uint256 memberId,
+        uint256 stripeId,
+        uint256 attestId
+    ) public view returns (uint256) {
+        return _getAttestById(memberId, stripeId, attestId).time;
+    }
+
+    function getAttestVote(
+        uint256 memberId,
+        uint256 stripeId,
+        uint256 attestId
+    ) public view returns (bool) {
+        return _getAttestById(memberId, stripeId, attestId).vote;
+    }
+
+    function getAttestMessage(
+        uint256 memberId,
+        uint256 stripeId,
+        uint256 attestId
+    ) public view returns (string memory) {
+        return _getAttestById(memberId, stripeId, attestId).message;
     }
 
     /// SECTION: Fast utility functions for tracking contribs.
@@ -189,10 +238,9 @@ contract BadgeFactory is
     function _mintBadge(address owner) internal {
         // Badge myBadge = Badge(_owner); //this is creating new contract on every mint
         ///look up badge by Id, which returns address of owner
+        require(addrToMemberId[owner] == 0, "You already own a DAO badge!");
         uint256 id = mint(owner);
         addrToMemberId[owner] = id;
-        // memberIdToAddress[mymemberId()] = _owner;
-
         emit NewBadge(owner, id);
     }
 
@@ -218,5 +266,21 @@ contract BadgeFactory is
         returns (Attestation memory)
     {
         return Attestation(msg.sender, block.timestamp, vote, message);
+    }
+
+    function _getContribById(
+        uint256 memberId,
+        uint256 stripeId,
+        uint256 contribId
+    ) private view returns (Contribution memory) {
+        return stripesById[memberId][stripeId].contribs[contribId];
+    }
+
+    function _getAttestById(
+        uint256 memberId,
+        uint256 stripeId,
+        uint256 attestId
+    ) private view returns (Attestation memory) {
+        return stripesById[memberId][stripeId].attests[attestId];
     }
 }
