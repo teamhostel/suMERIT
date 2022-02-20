@@ -4,7 +4,9 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 import { ethers } from "hardhat";
-
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { Signer } from "ethers";
+import { BadgeFactory } from "../typechain";
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
   // line interface.
@@ -14,12 +16,16 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const Greeter = await ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
+  const BadgeFactory = await ethers.getContractFactory("BadgeFactory");
+  const myName = "Future Trees";
+  const mySymbol = "FT";
+  const bf = await BadgeFactory.deploy(myName, mySymbol);
 
-  await greeter.deployed();
+  await bf.deployed();
 
-  console.log("Greeter deployed to:", greeter.address);
+  console.log("Badge Factory 0 Deployed to: ", bf.address);
+  console.log(myName);
+  console.log(mySymbol);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
