@@ -80,10 +80,15 @@ contract BadgeFactory is
         return ownerOf(id);
     }
 
+    function getContributionById(uint256 memberId, uint256 stripeId, uint256 contribId) public view returns (Contribution memory)
+    {
+        return stripesById[memberId][stripeId].contribs[contribId];
+    }
+
     /// SECTION: Fast utility functions for tracking contribs.
     ///@notice requires badge owner. Alt implementation allows DAO address to create stripes for members.
     ///@dev intended to be called my member = msg.sender. NO NEED TO INSTANTIATE CONTRIBS OR ATTESTS
-    function makeNewStripe(string memory message, string memory uri)
+    function addNewStripe(string memory message, string memory uri)
         external
         onlyHolder(addrToMemberId[msg.sender])
     {
