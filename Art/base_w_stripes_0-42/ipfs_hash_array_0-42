@@ -1,13 +1,9 @@
-pragma solidity <=0.8.9;
-
-
 // array of ipfs hashes for badge art, 
 // complete with number of stripes at stripeID point in the array.
 // 2048X2048p .png images
+// append "ipfs://" in front of each hash
 
-
-string[43] badgeWithStripesHashes;
-
+/*
 [
   {
     "path": "base.png",
@@ -225,3 +221,4 @@ string[43] badgeWithStripesHashes;
     "size": 2768982
   },
 ]
+*/
