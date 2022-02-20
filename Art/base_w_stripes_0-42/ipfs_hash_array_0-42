@@ -1,0 +1,227 @@
+pragma solidity <=0.8.9;
+
+
+// array of ipfs hashes for badge art, 
+// complete with number of stripes at stripeID point in the array.
+// 2048X2048p .png images
+
+
+string[43] badgeWithStripesHashes;
+
+[
+  {
+    "path": "base.png",
+    "hash": "QmWPtcYrxGDcW8FPxNFSkpxZYDuHSCu4iR2G27SqAakujm",
+    "size": 2651589
+  },
+  {
+    "path": "stripe_1.png",
+    "hash": "QmZyEFbcBM1H2ue1Hu6jfwrYKYZpb5TpZvdp4XGssfoSH7",
+    "size": 2696498
+  },
+  {
+    "path": "stripe_2.png",
+    "hash": "QmcksZGYGXgS7DNwkR1q2M8HdaWLkPCkyw9WpcEiiPNtH3",
+    "size": 2709694
+  },
+  {
+    "path": "stripe_3.png",
+    "hash": "QmRka75rE2wWZvTqNupD9Stc6NxD2KnSCeSmSmNmTeGvi1",
+    "size": 2723151
+  },
+  {
+    "path": "stripe_4.png",
+    "hash": "QmPpJXxCm11aEf7oDmeZS3MSZKHAie32y4RtndFRTcdktx",
+    "size": 2731431
+  },
+  {
+    "path": "stripe_5.png",
+    "hash": "QmWUZnukCCZL5shmRJSnwbDxNByEmH4DknX9T9HBZNTWT9",
+    "size": 2728692
+  },
+  {
+    "path": "stripe_6.png",
+    "hash": "QmNtt6mhnuGT6PEP8oP2CcugVVFD5g1JHuixAJQrKr45JU",
+    "size": 2725463
+  },
+  {
+    "path": "stripe_7.png",
+    "hash": "QmPYvTe9bXausspbyYELo3axTzQ3ce3vZMU2d6rV7KSXaJ",
+    "size": 2716988
+  },
+  {
+    "path": "stripe_8.png",
+    "hash": "QmS2CXAmoeZ3MeSPkEbMDKV6RmUiTR6zTJhmEmB8QUgQAS",
+    "size": 2704767
+  },
+  {
+    "path": "stripe_9.png",
+    "hash": "QmchQz65Wg48bfrzfD8keGDpHfTLmA7nVQCw8TogWdTtNb",
+    "size": 2688764
+  },
+  {
+    "path": "stripe_10.png",
+    "hash": "QmUrYYqPpb8GNsbhU1vtSaPAEq2yU97QwQSCjhfwQ32R5z",
+    "size": 2675869
+  },
+  {
+    "path": "stripe_11.png",
+    "hash": "QmY4SMqFgRTpNSuNpbwPN1fugWoXWvH5ffBocVqzPnuh3T",
+    "size": 2664512
+  },
+  {
+    "path": "stripe_12.png",
+    "hash": "QmePDXs47JEiTvbcL9dVqkZQ4AooNWiuJXvXsUKHjWMwvi",
+    "size": 2657595
+  },
+  {
+    "path": "stripe_13.png",
+    "hash": "QmZKt7eoMiacBuDyuPqQcuzect1d8Gdvx9RewDBBS4fyUT",
+    "size": 2653558
+  },
+  {
+    "path": "stripe_14.png",
+    "hash": "QmPPUsUhyqF5Z8n12Th3b7JfDnFh3qL4USNzE9zyPLSAQP",
+    "size": 2651323
+  },
+  {
+    "path": "stripe_15.png",
+    "hash": "QmZHXhoVdLD6iKejYLVrTtjMUSXrSEHk6xvZkk9GTHLyGD",
+    "size": 2658364
+  },
+  {
+    "path": "stripe_16.png",
+    "hash": "QmetU9TkrrcjA2q4Ymobc6vBbeYBeVrPkDwgNEq9A4daXG",
+    "size": 2661751
+  },
+  {
+    "path": "stripe_17.png",
+    "hash": "QmcuK9wdVRvJN2cz8ymMxB8tPPta1h8prS2euU3p2s7Cpr",
+    "size": 2670832
+  },
+  {
+    "path": "stripe_18.png",
+    "hash": "QmQUYMsM4mDfiyk3SLA38xfLJdf8pDJ4aiMWmem2erAWKL",
+    "size": 2673878
+  },
+  {
+    "path": "stripe_19.png",
+    "hash": "Qmeu67HiZk8ydUrghri2aUsbYMcUZTg82HwHMAx1SSXrS2",
+    "size": 2681908
+  },
+  {
+    "path": "stripe_20.png",
+    "hash": "QmV4zDCbqzDLvgVz21BThoeb4Xdt1MywhxuDaRrr2pwdNs",
+    "size": 2683185
+  },
+  {
+    "path": "stripe_21.png",
+    "hash": "QmSjWAG9eeTZY2Fh4kHW7YeQbTARNWTA7zdnDjG12JWSSH",
+    "size": 2693905
+  },
+  {
+    "path": "stripe_22.png",
+    "hash": "Qmaqbqx5FCRytvbE1Jmr4GFuuHLfVydXq4FdJX8RjGwydg",
+    "size": 2697841
+  },
+  {
+    "path": "stripe_23.png",
+    "hash": "QmTifmUxdRmJr7ihAFVszzU5zUSQua4KNJZNnjpdQmpUYL",
+    "size": 2707505
+  },
+  {
+    "path": "stripe_24.png",
+    "hash": "QmSDJ3eR224fuhXNGhfK4H3SVdnSmReucYBKAsdouSgtkx",
+    "size": 2716532
+  }
+  {
+    "path": "stripe_25.png",
+    "hash": "Qmd1hTyug9fJiqbczXeXJt9FrWJmZ8F9z22KSSsDwvAP4R",
+    "size": 2727476
+  },
+  {
+    "path": "stripe_26.png",
+    "hash": "QmaF2EA24MaKYFXeKS8FJB4u8qHw9W6YVPQiGe9LC3VVHa",
+    "size": 2732072
+  },
+  {
+    "path": "stripe_27.png",
+    "hash": "QmWATooKMEAUss45veRHxFDnLGaseB9FqHKj7WvSKpCJSV",
+    "size": 2737523
+  },
+  {
+    "path": "stripe_28.png",
+    "hash": "QmeRvjV4TLftdHbjRNn1YLaybpgj3gBrxHFyuPXSBd3FRW",
+    "size": 2741154
+  },
+  {
+    "path": "stripe_29.png",
+    "hash": "Qmcm5CxE9VeZYCTtMimLzsA3oEnTDMun5symS4yCA7G2hP",
+    "size": 2745827
+  },
+  {
+    "path": "stripe_30.png",
+    "hash": "QmeKHs3FBX5kXNjmRFZceG4rNfrEjCKp3PgyqFFx3ubXq5",
+    "size": 2748464
+  },
+  {
+    "path": "stripe_31.png",
+    "hash": "QmPBC3RMnPm6zWUEJVXM1uEV54JGsQh3ZJDr9KLM9Zedkk",
+    "size": 2753501
+  },
+  {
+    "path": "stripe_32.png",
+    "hash": "QmVdDchPodqs4GZ3WHbKRSmTyyE8Buqt91WA8rLzfTJArC",
+    "size": 2756320
+  }
+  {
+    "path": "stripe_33.png",
+    "hash": "QmPfHCXtwXo5Y7eNMBKXaSVgc8tfsskdtpSdL7kaHPejR7",
+    "size": 2758712
+  },
+  {
+    "path": "stripe_34.png",
+    "hash": "Qma9CQyXDhjtf2CeaujLDUhRvqhXTYREEAicKCvFzBNfSx",
+    "size": 2759968
+  },
+  {
+    "path": "stripe_35.png",
+    "hash": "QmfP1CXyXCkcXLaT5hxL116vouqDt2PAh1PSVX9DmzHarW",
+    "size": 2761548
+  },
+  {
+    "path": "stripe_36.png",
+    "hash": "QmcMVJdJKXZdGnFdTnAiSASvF9aG6uE7wr7YD9tzGGHsNX",
+    "size": 2762607
+  },
+  {
+    "path": "stripe_37.png",
+    "hash": "QmYehxkhRKapwCxwTgoJN3vLnxDk7927iyevnXHwcRAt2J",
+    "size": 2764787
+  },
+  {
+    "path": "stripe_38.png",
+    "hash": "QmRbCnVfVad1vyJf2UFa1fMxjdbK7DMviPV4XEw1M3U484",
+    "size": 2765262
+  }
+  {
+    "path": "stripe_39.png",
+    "hash": "QmZpfpXZrFPmsGymq6gHoQPDb7qKkNZ9NbghxwZziHfyn6",
+    "size": 2766640
+  },
+  {
+    "path": "stripe_40.png",
+    "hash": "Qme9zfUxUHR91vLvs26tL7eDD7B4Mu1RvXBspmGvhtq5me",
+    "size": 2767302
+  },
+  {
+    "path": "stripe_41.png",
+    "hash": "QmUWK3ZoWNttt6vXbC4mjADX2XQPrA2SVXZ9vmMLGafGZA",
+    "size": 2768426
+  },
+  {
+    "path": "stripe_42.png",
+    "hash": "QmWsJvUBBwbDEJjFGSLoUZjEZFdsWAZyzJXE82NbFfyW6e",
+    "size": 2768982
+  },
+]
