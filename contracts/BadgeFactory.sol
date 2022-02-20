@@ -96,12 +96,20 @@ contract BadgeFactory is
         return stripesById[memberId][stripeId].uri;
     }
 
-    function _getContribById(
+    function getContribAddress(
         uint256 memberId,
         uint256 stripeId,
         uint256 contribId
-    ) private view returns (Contribution memory) {
-        return stripesById[memberId][stripeId].contribs[contribId];
+    ) public view returns (address) {
+        return _getContribById(memberId, stripeId, contribId).contributor;
+    }
+
+    function getContribTime(
+        uint256 memberId,
+        uint256 stripeId,
+        uint256 contribId
+    ) public view returns (uint256) {
+        return _getContribById(memberId, stripeId, contribId).time;
     }
 
     function getContribMessage(
@@ -112,12 +120,52 @@ contract BadgeFactory is
         return _getContribById(memberId, stripeId, contribId).message;
     }
 
-    function getAttestById(
+    function getContribType(
+        uint256 memberId,
+        uint256 stripeId,
+        uint256 contribId
+    ) public view returns (string memory) {
+        return _getContribById(memberId, stripeId, contribId).contribType;
+    }
+
+    function getContribUri(
+        uint256 memberId,
+        uint256 stripeId,
+        uint256 contribId
+    ) public view returns (string memory) {
+        return _getContribById(memberId, stripeId, contribId).uri;
+    }
+
+    function getAttestAddress(
         uint256 memberId,
         uint256 stripeId,
         uint256 attestId
-    ) public view returns (Attestation memory) {
-        return stripesById[memberId][stripeId].attests[attestId];
+    ) public view returns (address) {
+        return _getAttestById(memberId, stripeId, attestId).attestor;
+    }
+
+    function getAttestTime(
+        uint256 memberId,
+        uint256 stripeId,
+        uint256 attestId
+    ) public view returns (uint256) {
+        return _getAttestById(memberId, stripeId, attestId).time;
+    }
+
+    function getAttestVote(
+        uint256 memberId,
+        uint256 stripeId,
+        uint256 attestId
+    ) public view returns (bool) {
+        return _getAttestById(memberId, stripeId, attestId).vote;
+    }
+
+    function getAttestMessage(
+        uint256 memberId,
+        uint256 stripeId,
+        uint256 attestId
+    ) public view returns (string memory) {
+        return _getAttestById(memberId, stripeId, attestId).message;
     }
 
     /// SECTION: Fast utility functions for tracking contribs.
@@ -218,5 +266,21 @@ contract BadgeFactory is
         returns (Attestation memory)
     {
         return Attestation(msg.sender, block.timestamp, vote, message);
+    }
+
+    function _getContribById(
+        uint256 memberId,
+        uint256 stripeId,
+        uint256 contribId
+    ) private view returns (Contribution memory) {
+        return stripesById[memberId][stripeId].contribs[contribId];
+    }
+
+    function _getAttestById(
+        uint256 memberId,
+        uint256 stripeId,
+        uint256 attestId
+    ) private view returns (Attestation memory) {
+        return stripesById[memberId][stripeId].attests[attestId];
     }
 }

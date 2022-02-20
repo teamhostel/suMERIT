@@ -85,10 +85,26 @@ describe("suMERIT Contracts", function () {
       //test contrib to specific stripe
       bf.connect(futuretrees).contribToStripe(0, "I am writing test cases for our hack", "solidity", "ipfs::");
 
-      const mymessage = await bf.connect(owner).getContribMessage(0, 0, 0); //had to specify explicitly connecting with wallet address
-      expect(mymessage).to.equal(contribMsg);
-      console.log("\tMy message:  ", mymessage);
+      const myMessage = await bf.connect(owner).getContribMessage(0, 0, 0); //had to specify explicitly connecting with wallet address
+      const contribType = await bf.connect(owner).getContribType(0, 0, 0); //had to specify explicitly connecting with wallet address
+      const ipfs = await bf.connect(futuretrees).getContribUri(0, 0, 0);
+      const time = await bf.connect(futuretrees).getContribTime(0,0,0);
+      expect(myMessage).to.equal(contribMsg);
+      expect(contribType).to.equal("solidity");
+      console.log("\tMy message:  ", myMessage);
+      console.log("\tcontrib Type: ", contribType);
+      console.log("\tipfs link: ", ipfs);
+      console.log("\ttime: ", time);
+    });
+
+    it("Should add Contribs to the latest Stripe", async function appendContri() {
+      bf.connect(myco).contribToLatestStripe(0, "I am writing test cases for our hack", "solidity", "ipfs::");
     })
+
+    it("Should allow DAO members to vote on stripes", async function appendAttest() {
+      const myVote = false;
+            
+    });
   });
 
 });
