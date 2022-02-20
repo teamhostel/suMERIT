@@ -58,8 +58,12 @@ contract Badge is
     ) internal {
         uint256 stripeId = stripesById[memberId].length;
         stripesById[memberId].push();
+
         stripesById[memberId][stripeId].message = message;
         stripesById[memberId][stripeId].uri = uri;
+        stripesById[memberId][stripeId].message = message;
+        stripesById[memberId][stripeId].contribSize = 0;
+        stripesById[memberId][stripeId].attestSize = 0;
     }
 
     /// @notice Add a contrib to specific member's stripe
@@ -75,6 +79,7 @@ contract Badge is
         Stripe storage stripe = stripesById[memberId][stripeId];
         stripe.contribs[stripe.contribSize] = contrib;
         stripe.contribSize++;
+        // stripesById[memberId][stripeId].contribs[stripesById[memberId][stripeId].contribSize]
     }
 
     /// @notice Add a contrib to your most recent stripe

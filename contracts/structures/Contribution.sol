@@ -19,4 +19,9 @@ contract cContribution {
         string uri;
         ///@dev idea: gradient color could represent the amount of your contrib
     }
+
+    function messageOf(Contribution memory c) public pure returns (string memory)
+    {
+        return c.message;
+    }
 }
