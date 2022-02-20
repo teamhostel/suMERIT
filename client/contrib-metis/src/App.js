@@ -3,12 +3,14 @@ import { useState } from 'react';
 import { ethers } from "ethers";
 import './App.css';
 import contract from './contracts/BadgeFactory.json';
+//import {BadgeFactory} from '../../artifacts/contracts/BadgeFactory.sol'
 import BadgeCreationForm from './BadgeCreationForm';
 import MeritSubmitForm from './MeritSubmitForm';
 import { ContractFactory } from 'ethers';
 
-const badgeFactoryOwner = "";
+const badgeFactoryAddress = "0x41fdbDc2282BC97EF11a8f7747464099aC073325";
 const abi = contract.abi;
+
 
 function App() {
 
@@ -59,11 +61,11 @@ function App() {
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
-        const nftContract = new ethers.Contract(badgeFactoryOwner, abi, signer);
+        const badgeFactory = new ethers.Contract(badgeFactoryAddress, abi, signer);
 
         console.log("Initialize Payment");
-        const memberAddress = "0x2c2D987Df8ffbe670C32cC80a56DdB76c0CffED7";
-        let nftTxn = await nftContract.addDaoMember(memberAddress);
+        const memberAddress = "0x39eaAE284347216620De2bfE829C64e4e0Ccf426";
+        let nftTxn = await badgeFactory.addDaoMember(memberAddress);
 
         console.log("Minting...");
         await nftTxn.wait();
@@ -157,6 +159,7 @@ const deployBadgeFactory = async () => {
             <h2 className="uppercase font-black">Contrib Way</h2>
             <p className="text-sm text-left">This is the way of the contributor. A contributor can mint a base badge for every DAO that they are a member of. Their contributions to the DAO can then be recognized as they earn their stripes. Each stripe is a minted SVG that includes the metadata of the attested contribution.
             </p>
+
           </div>
         </div>
       </div>
