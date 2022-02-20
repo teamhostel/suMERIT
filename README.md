@@ -1,8 +1,21 @@
-# Contrib
+# suMERIT
 Streamlined merit badge styled modular DAO contribution recorder.
 
+## setup & test
+  ```yarn
+  yarn hardhat compile
+  yarn hardhat test
+  ```
+## BadgeFactory is Badge
+This contract is owned by the DAO wallet. In future, will be deployed by Badge Factory Manager contract - which will customize your DAO's Badge Factory.
+### modifiers
+- `onlyMember`: must own one Badge NFT
+- `onlyHolder`: must own this Badge ID
+### storage
 
-# Hardhat sample proj documentation
+### functions
+
+# Hardhat sample project docs
 This project demonstrates an advanced Hardhat use case, integrating other tools commonly used alongside Hardhat in the ecosystem.
 
 The project comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts. It also comes with a variety of other tools, preconfigured to work with the project code.
