@@ -18,6 +18,7 @@ contract BadgeFactory is
     address private daoToken;
     Badge private badge; //NFT contract! address behind the scenes (it's also a contract that looks like badge interface)
     /// @notice return the DAO member Id for an address
+    mapping(address => address) public addrToBadgeFactory;
     mapping(address => uint256) public addrToMemberId;
 
     /// SECTION: MODIFIERS
@@ -35,7 +36,6 @@ contract BadgeFactory is
 
     /// SECTION: EVENTS
     event NewBadge(address owner, uint256 memberId);
-
     // event NewFactory(address memory cont); //for BFM
 
     /**
@@ -47,6 +47,7 @@ contract BadgeFactory is
         string memory name, //badge or dao name
         string memory symbol //TICKER SYM
     ) Badge(name, symbol) {
+        addrToBadgeFactory[msg.sender] = address(this);
         // _setTokenURI(tokenId, _tokenURI);
     }
 
@@ -237,10 +238,9 @@ contract BadgeFactory is
     function _mintBadge(address owner) internal {
         // Badge myBadge = Badge(_owner); //this is creating new contract on every mint
         ///look up badge by Id, which returns address of owner
+        require(addrToMemberId[owner] == 0, "You already own a DAO badge!");
         uint256 id = mint(owner);
         addrToMemberId[owner] = id;
-        // memberIdToAddress[mymemberId()] = _owner;
-
         emit NewBadge(owner, id);
     }
 
