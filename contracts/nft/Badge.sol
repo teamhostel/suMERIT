@@ -21,9 +21,14 @@ contract Badge is
 
     //dao sets the theme for stripesById
     //every member needs their own list of stripesById
-    mapping(uint256 => mapping(uint256 => Stripe)) public stripesById;
-    mapping(uint256 => uint256) public stripeCount;
-    // mapping(uint256 => uint256) public reputationById;
+    // mapping(uint256 => mapping(uint256 => Stripe)) public stripesById;
+    // mapping(uint256 => uint256) public stripeCount;
+    mapping(uint256 => Contribution[]) private _contribs;
+    // mapping(uint256 => uint256) private _contribSize;
+    mapping(uint256 => Attestation[]) private _attests;
+    // mapping(uint256 => uint256) private _attestSize;
+    mapping(uint256 => Stripe[]) private _stripes;
+
     mapping(uint256 => bool) private transferApprovalById; //option to enable transfers for certain members
     mapping(uint256 => string) public discordUsernameById; ///store discord username per badge ID. Then, gelato can automate pushing discord contrib messages to badges! Saving members gas
 

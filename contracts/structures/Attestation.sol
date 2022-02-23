@@ -2,14 +2,15 @@
 pragma solidity <=0.8.9;
 
 ///@dev (require some count of attestations to post your first contrib?)
-contract cAttestation {
-    struct Attestation {
-        ///@notice who is voting?
-        address attestor;
-        uint256 time;
-        ///@notice yes/no
-        bool vote;
-        ///@notice optional included message
-        string message;
-    }
+struct Attestation {
+    ///@dev block.timestamp
+    uint256 time;
+    ///@notice Attached Contribution Id that you are voting on
+    uint256 contribId;
+    ///@notice What DAO member is voting?
+    address attestor;
+    ///@notice yes/no
+    bool vote;
+    ///@notice optional included message
+    string message;
 }

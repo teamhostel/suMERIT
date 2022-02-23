@@ -17,11 +17,10 @@ contract BadgeFactory is
     Badge //ownable allows ownership transfer of contract
 {
     /// SECTION: FACTORY STORAGE
-    address private daoToken;
+    address public daoToken;
     string public baseURI;
     Badge private badge; //NFT contract! address behind the scenes (it's also a contract that looks like badge interface)
     /// @notice return the DAO member Id for an address
-    mapping(address => address) public addrToBadgeFactory;
     mapping(address => uint256) public addrToMemberId;
 
     /// SECTION: MODIFIERS
@@ -53,7 +52,6 @@ contract BadgeFactory is
         string memory uri
     ) Badge(name, symbol) {
         baseURI = uri;
-        addrToBadgeFactory[msg.sender] = address(this);
         // _setTokenURI(tokenId, _tokenURI);
     }
 

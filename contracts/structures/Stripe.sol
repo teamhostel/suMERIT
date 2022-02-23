@@ -5,25 +5,13 @@ import "./Attestation.sol";
 import "./Contribution.sol";
 
 ///@notice batch together work into "Stripes" which represent epochs of effort.
-///        then attest to the whole stripe
-///@dev    fascinating tradeoffs between mappings and arrays.
-/// using contracts as namespaces
-contract cStripe is cContribution, cAttestation {
-    struct Stripe {
-        ///@dev one stripe may have many contrib types with separate messages
-        ///@notice concise github commit-style message describing the purpose of the stripe.
-        string message;
-        ///@dev if the stripe had an svg or png
-        ///@dev long term - render rich svg
-        string uri;
-        ///@dev comparing arrays versus mappings! Mappings seem better for this.
-        // Contribution[] contribs; //array of struct
-        mapping(uint256 => Contribution) contribs;
-        uint256 contribSize;
-        // Attestation[] attests;
-        mapping(uint256 => Attestation) attests;
-        uint256 attestSize;
-    }
-
-    ///SECTION: SETTERS AND GETTERS
+///@dev Attach your contribs to a stripeId in order to batch your effort into epochs or seasons.
+struct Stripe {
+    ///@notice concise github commit-style message describing the purpose of the stripe.
+    string message;
+    ///@notice store URI if the stripe has an svg or png
+    ///@dev idea: render rich svg's based on the contrib/attest text inside a badge
+    string uri;
 }
+
+///SECTION: SETTERS AND GETTERS
