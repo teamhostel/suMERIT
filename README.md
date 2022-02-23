@@ -1,6 +1,14 @@
 # suMERIT
 Streamlined merit badge styled modular DAO contribution recorder.
 
+Your DAO deploys a Badge Factory, allowing you to batch mint NFT badges for all your DAO members
+
+These badges are on-chain journals for you to document your contribs to your DAO. Plus, badge carrying members gain the right to write attestations to your badge, including a yes/no vote and a string message. All data is stored in the Badge NFT as a mapping.
+
+This concept is non-financial, thus it only works on cheap chains or rollups. But the data extracted from badges could set up inter-dao lending markets and more coordination!
+
+Please fork and contrib if you like our concept. Thanks for your time, looking forward to collaborating!
+
 ## setup & test
   ```yarn
   yarn hardhat compile
@@ -15,7 +23,17 @@ This contract is owned by the DAO wallet. In future, will be deployed by Badge F
 
 ### functions
 
-# Hardhat sample project docs
+## Todo: 
+- simplify mappings (less dimensions)
+- Complete the test cases
+- Rebuild front end
+- Create "Badge Factory Manager" inspired from Zora Module Manager- it's job is to deploy configured badge factories.
+- Render the badges as SVGs from all the internal content. The entire badge can be made from contribution/attestation text. Think word art!
+
+
+---
+
+# Hardhat boilerplate project docs
 This project demonstrates an advanced Hardhat use case, integrating other tools commonly used alongside Hardhat in the ecosystem.
 
 The project comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts. It also comes with a variety of other tools, preconfigured to work with the project code.
