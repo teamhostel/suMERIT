@@ -1,16 +1,25 @@
 # suMERIT
-Streamlined merit badge styled modular DAO contribution recorder.
+[Notion Page](https://futuretrees.notion.site/suMERIT-TEAM-HOSTEL-Eth-Denver-f39352440945410392c08d544f289a6f)
 
-Your DAO deploys a Badge Factory, allowing you to batch mint NFT badges for all your DAO members
+### Modular DAO Badge NFT  | on-chain Contribution & Attestation recorder
 
-These badges are on-chain journals for you to document your contribs to your DAO. Plus, badge carrying members gain the right to write attestations to your badge, including a yes/no vote and a string message. All data is stored in the Badge NFT as a mapping.
+- DAO deploys a Badge Factory Contract, allowing DAO to batch mint NFT badges for all DAO members
 
-This concept is non-financial, thus it only works on cheap chains or rollups. But the data extracted from badges could set up inter-dao lending markets and more coordination!
+  - These badges are on-chain journals for you to document your contribs to your DAO. 
+  - Plus, badge carrying members gain the right to write attestations to your badge, including a yes/no vote and a string message. 
+  - All data is stored in the Badge NFT as a mapping.
+  - Render your contribs and attests as an SVG badge
+- This concept is primarily **non-financial**, thus works best on cheap chains or rollups, but the data from badges...
 
-Please fork and contrib if you like our concept. Thanks for your time, looking forward to collaborating!
+  - Could set up inter-dao undercollateralized lending markets!
+  - Could weight voting power based on time in DAO and contribution history!
+  - Could be a portable self-sovereign resume, which allows partner DAOs to "Level Boost" a new member based on their contrib & attest history in other DAOs!
+
+Please **fork** and **contrib** if you like our concept. Thanks for your time, looking forward to collaborating!
 
 ## setup & test
-  ```yarn
+  ```
+  yarn
   yarn hardhat compile
   yarn hardhat test
   ```
