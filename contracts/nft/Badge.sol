@@ -13,8 +13,7 @@ import "./../structures/Stripe.sol";
  */
 contract Badge is
     Ownable,
-    ERC721URIStorage, //for storing remote ref in NFT
-    cStripe
+    ERC721URIStorage
 {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
