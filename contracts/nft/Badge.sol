@@ -4,6 +4,9 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+
+import "./../structures/Contribution.sol";
+import "./../structures/Attestation.sol";
 import "./../structures/Stripe.sol";
 
 /**
@@ -11,19 +14,20 @@ import "./../structures/Stripe.sol";
  * non-transfereble NFT
  * Owner = BadgeFactory Contract
  */
-contract Badge is
-    Ownable,
-    ERC721URIStorage, //for storing remote ref in NFT
-    cStripe
-{
+contract Badge is Ownable, ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
     //dao sets the theme for stripesById
     //every member needs their own list of stripesById
-    mapping(uint256 => mapping(uint256 => Stripe)) public stripesById;
-    mapping(uint256 => uint256) public stripeCount;
-    // mapping(uint256 => uint256) public reputationById;
+    // mapping(uint256 => mapping(uint256 => Stripe)) public stripesById;
+    // mapping(uint256 => uint256) public stripeCount;
+    mapping(uint256 => Contribution[]) internal _contribs;
+    // mapping(uint256 => uint256) private _contribSize;
+    mapping(uint256 => Attestation[]) internal _attests;
+    // mapping(uint256 => uint256) private _attestSize;
+    mapping(uint256 => Stripe[]) internal _stripes;
+
     mapping(uint256 => bool) private transferApprovalById; //option to enable transfers for certain members
     mapping(uint256 => string) public discordUsernameById; ///store discord username per badge ID. Then, gelato can automate pushing discord contrib messages to badges! Saving members gas
 
@@ -41,18 +45,26 @@ contract Badge is
         require(false, "Non-transferrable!");
     }
 
+    /**
+     * @notice Mint new badge
+     * @param to address to mint
+     * @return newId of the minted NFT
+     */
     function mint(address to) internal returns (uint256) {
         //DAO member 1 - indexed
         _tokenIds.increment();
-        uint256 newItemId = _tokenIds.current();
+        uint256 newId = _tokenIds.current();
 
-        _safeMint(to, newItemId);
-        return newItemId;
-        // memberId = newItemId; //this goes into owner field
+        _safeMint(to, newId);
+        return newId;
+        // memberId = newId; //this goes into owner field
     }
 
-    /// @notice "mint" a new stripe for a member ID
-    /// @dev stripesById is a 2d nested mapping for Stripes for everyone!
+    /**
+     * @notice "mint" a new stripe for a member ID
+     * @dev stripesById is a 2d nested mapping for Stripes for everyone!
+     *
+     */
     function newStripeForId(
         uint256 memberId,
         string memory message,
@@ -60,13 +72,16 @@ contract Badge is
     ) internal {
         // uint256 stripeId = stripesById[memberId].length;
         // stripesById[memberId].push();
-        uint256 myStripes = stripeCount[memberId];
-        stripesById[memberId][myStripes].message = message;
-        stripesById[memberId][myStripes].uri = uri;
-        stripesById[memberId][myStripes].message = message;
-        stripesById[memberId][myStripes].contribSize = 0;
-        stripesById[memberId][myStripes].attestSize = 0;
-        stripeCount[memberId]++;
+
+        // uint256 myStripes = stripeCount[memberId];
+        // stripesById[memberId][myStripes].message = message;
+        // stripesById[memberId][myStripes].uri = uri;
+        // stripesById[memberId][myStripes].message = message;
+        // stripesById[memberId][myStripes].contribSize = 0;
+        // stripesById[memberId][myStripes].attestSize = 0;
+        // stripeCount[memberId]++;
+        _stripes[memberId].push(Stripe(message, uri));
+        // return _stripes[memberId].length();
     }
 
     /// @notice Add a contrib to specific member's stripe
@@ -79,10 +94,13 @@ contract Badge is
         uint256 stripeId,
         Contribution memory contrib
     ) internal {
-        Stripe storage stripe = stripesById[memberId][stripeId];
-        stripe.contribs[stripe.contribSize] = contrib;
-        stripe.contribSize++;
+        // Stripe storage stripe = stripesById[memberId][stripeId];
+        // stripe.contribs[stripe.contribSize] = contrib;
+        // stripe.contribSize++;
         // stripesById[memberId][stripeId].contribs[stripesById[memberId][stripeId].contribSize]
+
+        //setStripeId(contrib, stripeId);
+        _contribs[memberId].push(contrib);
     }
 
     /// @notice Add a contrib to your most recent stripe
@@ -91,10 +109,13 @@ contract Badge is
         uint256 memberId,
         Contribution memory contrib
     ) internal {
+        // uint256 stripeId = getLatestStripeId(memberId);
         uint256 stripeId = getLatestStripeId(memberId);
-        Stripe storage stripe = stripesById[memberId][stripeId];
-        stripe.contribs[stripe.contribSize] = contrib;
-        stripe.contribSize++;
+        contrib.stripeId = stripeId;
+        _contribs[memberId].push(contrib);
+        // Stripe storage stripe = stripesById[memberId][stripeId];
+        // stripe.contribs[stripe.contribSize] = contrib;
+        // stripe.contribSize++;
     }
 
     function appendAttestToStripe(
@@ -102,47 +123,49 @@ contract Badge is
         uint256 stripeId,
         Attestation memory attest
     ) internal {
-        Stripe storage stripe = stripesById[memberId][stripeId];
-        stripe.attests[stripe.contribSize] = attest;
-        stripe.attestSize++;
+        // Stripe storage stripe = stripesById[memberId][stripeId];
+        // stripe.attests[stripe.contribSize] = attest;
+        // stripe.attestSize++;
     }
 
+    /// is a latestStripe function necessary??
     /// @notice Add your attestation for the latest stripe!
     /// @dev Stripe struct contains contribs and attestations
     function appendAttestToLatestStripe(
         uint256 memberId,
         Attestation memory attest
     ) internal {
-        uint256 stripeId = getLatestStripeId(memberId);
-        Stripe storage stripe = stripesById[memberId][stripeId];
-        stripe.attests[stripe.contribSize] = attest;
-        stripe.attestSize++;
+        // uint256 stripeId = getLatestStripeId(memberId);
+        // Stripe storage stripe = stripesById[memberId][stripeId];
+        // stripe.attests[stripe.contribSize] = attest;
+        // stripe.attestSize++;
     }
 
     ///SECTION: VIEW FUNCTIONS
     ///@dev //push var to the stack. Reading is cheap, memory is cheap (discarded), storing extremely expensive
     function getLatestStripeId(uint256 memberId) public view returns (uint256) {
-        require(stripeCount[memberId] > 0, "Go and add your first Stripe!");
-        return stripeCount[memberId] - 1;
+        require(getStripeCount(memberId) > 0, "Go and add your first Stripe!");
+        return getStripeCount(memberId) - 1;
     }
 
     function getStripeCount(uint256 memberId) public view returns (uint256) {
-        return stripeCount[memberId];
+        // return stripeCount[memberId];
+        return _stripes[memberId].length;
     }
 
-    function getContribMessagesById(uint256 memberId, uint256 stripeId)
+    function getContribMessagesByStripeId(uint256 memberId, uint256 stripeId)
         public
         view
         returns (string[] memory)
     {
-        uint256 size = stripesById[memberId][stripeId].contribSize;
-        string[] memory messages = new string[](size);
-        for (uint256 index = 0; index < size; index++) {
-            string memory message = stripesById[memberId][stripeId]
-                .contribs[index]
-                .message;
-            messages[index] = message;
-        }
-        return messages;
+        // uint256 size = stripesById[memberId][stripeId].contribSize;
+        // string[] memory messages = new string[](size);
+        // for (uint256 index = 0; index < size; index++) {
+        //     string memory message = stripesById[memberId][stripeId]
+        //         .contribs[index]
+        //         .message;
+        //     messages[index] = message;
+        // }
+        // return messages;
     }
 }

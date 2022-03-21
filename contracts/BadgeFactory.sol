@@ -13,15 +13,12 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 /// @dev    BFM - badge factory manager will contains module addresses.
 ///         Allows construcing your DAO's custom badge factory. A factory for badge factory.
 ///         benefit of factory: deploying contract is dead simple
-contract BadgeFactory is
-    Badge //ownable allows ownership transfer of contract
-{
+contract BadgeFactory is Badge {
     /// SECTION: FACTORY STORAGE
-    address private daoToken;
+    address public daoToken;
     string public baseURI;
     Badge private badge; //NFT contract! address behind the scenes (it's also a contract that looks like badge interface)
     /// @notice return the DAO member Id for an address
-    mapping(address => address) public addrToBadgeFactory;
     mapping(address => uint256) public addrToMemberId;
 
     /// SECTION: MODIFIERS
@@ -53,7 +50,6 @@ contract BadgeFactory is
         string memory uri
     ) Badge(name, symbol) {
         baseURI = uri;
-        addrToBadgeFactory[msg.sender] = address(this);
         // _setTokenURI(tokenId, _tokenURI);
     }
 
@@ -96,7 +92,7 @@ contract BadgeFactory is
         view
         returns (string memory message)
     {
-        return stripesById[memberId][stripeId].message;
+        return _stripes[memberId][stripeId].message;
     }
 
     function getStripeUriById(uint256 memberId, uint256 stripeId)
@@ -104,7 +100,7 @@ contract BadgeFactory is
         view
         returns (string memory uri)
     {
-        return stripesById[memberId][stripeId].uri;
+        return _stripes[memberId][stripeId].uri;
     }
 
     function getContribAddress(
@@ -112,7 +108,8 @@ contract BadgeFactory is
         uint256 stripeId,
         uint256 contribId
     ) public view returns (address) {
-        return _getContribById(memberId, stripeId, contribId).contributor;
+        // return _getContribById(memberId, stripeId, contribId).contributor;
+        return ownerOf(memberId);
     }
 
     function getContribTime(
@@ -205,7 +202,7 @@ contract BadgeFactory is
     ) public onlyHolder(addrToMemberId[msg.sender]) {
         Contribution memory contrib;
         ///@dev long-form more readable syntax
-        contrib.contributor = msg.sender;
+        // contrib.contributor = msg.sender;    // deprecated because a contribution is automatically attached to the contributor's badge address owner
         contrib.time = block.timestamp;
         contrib.message = message;
         contrib.contribType = contribType;
@@ -260,20 +257,27 @@ contract BadgeFactory is
         emit NewBadge(owner, id);
     }
 
+    /// TODO: redo contrib logic
     /// called by public contrib functions
     function _createContrib(
         string memory message,
         string memory contribType,
         string memory uri
     ) private view returns (Contribution memory) {
-        return
-            Contribution(
-                msg.sender, //question: when you call inherited functions, does msg.sender == the highest level address? (EOA)
-                block.timestamp,
-                message,
-                contribType,
-                uri
-            );
+        Contribution memory c;
+        c.time = block.timestamp;
+        c.stripeId = getLatestStripeId(addrToMemberId[msg.sender]);
+        c.contribType = contribType;
+        c.uri = uri;
+        c.message = message;
+        return c;
+            // Contribution(
+            //     msg.sender, //question: when you call inherited functions, does msg.sender == the highest level address? (EOA)
+            //     block.timestamp,
+            //     message,
+            //     contribType,
+            //     uri
+            // );
     }
 
     function _createAttest(bool vote, string memory message)
@@ -281,7 +285,10 @@ contract BadgeFactory is
         view
         returns (Attestation memory)
     {
-        return Attestation(msg.sender, block.timestamp, vote, message);
+        // return Attestation(msg.sender, block.timestamp, vote, message);
+        Attestation memory a;
+
+        return a;
     }
 
     function _getContribById(
@@ -289,7 +296,8 @@ contract BadgeFactory is
         uint256 stripeId,
         uint256 contribId
     ) private view returns (Contribution memory) {
-        return stripesById[memberId][stripeId].contribs[contribId];
+        // return stripesById[memberId][stripeId].contribs[contribId];
+        return _contribs[memberId][contribId];
     }
 
     function _getAttestById(
@@ -297,6 +305,7 @@ contract BadgeFactory is
         uint256 stripeId,
         uint256 attestId
     ) private view returns (Attestation memory) {
-        return stripesById[memberId][stripeId].attests[attestId];
+        // return stripesById[memberId][stripeId].attests[attestId];
+        return _attests[memberId][attestId];
     }
 }
