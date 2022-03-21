@@ -1,8 +1,6 @@
 // contracts/structures/Stripe.sol
 // SPDX-License-Identifier: MIT
 pragma solidity <=0.8.9;
-import "./Attestation.sol";
-import "./Contribution.sol";
 
 ///@notice batch together work into "Stripes" which represent epochs of effort.
 ///@dev Attach your contribs to a stripeId in order to batch your effort into epochs or seasons.

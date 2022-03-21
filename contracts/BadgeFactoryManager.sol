@@ -10,7 +10,7 @@ contract BadgeFactoryManager {
     address public registrar;
 
     /// @notice The module fee NFT contract to mint from upon module registration
-    ZoraProtocolFeeSettings public moduleFeeToken;
+    // ZoraProtocolFeeSettings public moduleFeeToken;
 
     /// @notice Mapping of each user to module approval in the ZORA registry
     /// @dev User address => Module address => Approved
@@ -34,26 +34,26 @@ contract BadgeFactoryManager {
         require(_registrar != address(0), "BFM::must set registrar to non-zero address");
 
         registrar = _registrar;
-        moduleFeeToken = ZoraProtocolFeeSettings(_feeToken);
+        // moduleFeeToken = ZoraProtocolFeeSettings(_feeToken);
     }
 
     function createBadgeFactoryContract(string memory name, string memory symbol, string memory uri) public
     {
-        require(_addrToBadgeFactory[msg.sender] == 0, "Your DAO already owns a Badge Factory!");
-        Badge storage b = new Badge(name, symbol, uri);
-        _addrToBadgeFactory[msg.sender] = address(b);
-        BadgeFactoryById.push(address(b)); 
+        require(address(_addrToBadgeFactory[msg.sender]) == address(0), "Your DAO already owns a Badge Factory!");
+        BadgeFactory b = new BadgeFactory(name, symbol, uri);
+        _addrToBadgeFactory[msg.sender] = b;
+        BadgeFactoryById.push(b); 
     }
 
     function getMyBadgeFactory() public view returns(BadgeFactory)
     {
-        require(_addrToBadgeFactory[msg.sender] != 0, "Your DAO does not own a Badge Factory!");
+        require(address(_addrToBadgeFactory[msg.sender]) != address(0), "Your DAO does not own a Badge Factory!");
         return _addrToBadgeFactory[msg.sender];
     }
 
     function getBadgeFactory(address owner) public view returns(BadgeFactory)
     {
-        require(_addrToBadgeFactory[owner] != 0, "Your DAO does not own a Badge Factory!");
+        require(address(_addrToBadgeFactory[owner]) != address(0), "Your DAO does not own a Badge Factory!");
         return _addrToBadgeFactory[msg.sender];
     }
 
