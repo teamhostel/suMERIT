@@ -6,3 +6,5 @@ class Dao extends Component {
     return ()
   }
 }
+
+export default Dao
