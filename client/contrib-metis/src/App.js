@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { ethers } from "ethers";
 import './App.css';
 import contract from './contracts/BadgeFactory.json';
+import PageHeader from './PageHeader';
 import BadgeCreationForm from './BadgeCreationForm';
 import MeritSubmitForm from './MeritSubmitForm';
 import { ContractFactory } from 'ethers';
@@ -133,13 +134,9 @@ const deployBadgeFactory = async () => {
   return (
 
     <div className="App">
+    <PageHeader />
 
-      <div className='container text-white p-8'>
-        <h1>suMERIT - Contribute to the power of the DAO</h1>
-        <p> {currentAccount} </p>
-        <p>{balance} </p>
-        {currentAccount ? "" : connectWalletButton()}
-      </div>
+
 
       <div className='container'>
         <div className="grid grid-cols gap-4">
@@ -152,12 +149,14 @@ const deployBadgeFactory = async () => {
             <p className="text-sm text-left">This is the way of the DAO. A DAO should follow this path in order to mint their Badge Factory. Once a Badge Factory is created and the design of the DAO's badge is finalized all members will be able to mint their individual badges.</p>
 
             {mintBadgeButton()}
+
           </div>
           <div className="bg-white shadow-lg p-4 rounded">
             <h2 className="uppercase font-black">Contrib Way</h2>
             <p className="text-sm text-left">This is the way of the contributor. A contributor can mint a base badge for every DAO that they are a member of. Their contributions to the DAO can then be recognized as they earn their stripes. Each stripe is a minted SVG that includes the metadata of the attested contribution.
             </p>
           </div>
+          <MeritSubmitForm />
         </div>
       </div>
 
