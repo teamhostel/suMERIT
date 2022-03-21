@@ -1,6 +1,10 @@
 # suMERIT
 [Notion Page](https://futuretrees.notion.site/suMERIT-TEAM-HOSTEL-Eth-Denver-f39352440945410392c08d544f289a6f)
 
+First place: METIS Bounty @ Eth Denver 2022
+- [Announcement](https://twitter.com/MetisDAO/status/1499791463126904839)
+- [See all Eth Denver Winners](https://www.ethdenver.com/2022-irl-winners)
+
 ### Modular DAO Badge NFT  | on-chain Contribution & Attestation recorder
 
 - DAO deploys a Badge Factory Contract, allowing DAO to batch mint NFT badges for all DAO members
