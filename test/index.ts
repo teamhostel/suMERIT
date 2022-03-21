@@ -2,7 +2,6 @@ const { expect } = require("chai");
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { Signer } from "ethers";
 import { ethers } from "hardhat";
-import { it } from "mocha";
 import { BadgeFactory } from "../typechain";
 
 describe("suMERIT Contracts", function () {
@@ -80,14 +79,14 @@ describe("suMERIT Contracts", function () {
             expect(await bf.getStripeMessageById(ftId, 0)).to.equal(peyTrib);
             expect(await bf.getStripeUriById(ftId, 0)).to.equal("ipfs://");
 
-            expect((await bf.stripesById(ftId, 0)).contribSize).to.equal(0);
-            expect((await bf.stripesById(ftId, 0)).attestSize).to.equal(0);
+            // expect((await bf.stripesById(ftId, 0)).contribSize).to.equal(0);
+            // expect((await bf.stripesById(ftId, 0)).attestSize).to.equal(0);
 
             await bf.connect(myco).addNewStripe(mycoTrib, "");
             const mycoId = await bf.addrToMemberId(myco.address);
             expect(mycoId).to.equal(2);
             expect(await bf.getStripeMessageById(mycoId, 0)).to.equal(mycoTrib);
-            expect((await bf.stripesById(mycoId, 0)).contribSize).to.equal(0);
+            // expect((await bf.stripesById(mycoId, 0)).contribSize).to.equal(0);
         });
 
         it("Should set token URI based on the number of stripes", async function setURIByStripeCount() {
@@ -118,8 +117,10 @@ describe("suMERIT Contracts", function () {
             expect(mymessage).to.equal(contribMsg);
             console.log("\tMy message: ", mymessage);
 
-            console.log(await bf.getContribMessagesById(1, 1));
-            console.log("\t\tPeyton has this many contribs at stripe #1: ", (await bf.stripesById(1, 1)).contribSize);
+            // console.log(await bf.getContribMessagesById(1, 1));
+            // console.log("\t\tPeyton has this many contribs at stripe #1: ", (await bf.stripesById(1, 1)).contribSize);
+
+            //got to count up all the contributions for a stripe. for loop.
         });
     });
 });
